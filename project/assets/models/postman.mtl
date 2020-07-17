@@ -1,0 +1,62 @@
+# Blender MTL File: 'None'
+# Material Count: 5
+
+newmtl m0
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.470588 0.470588 0.470588
+Ks 0.449020 0.449020 0.449020
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd F:\alte festplatte\zelda objekte\Twilight Princess 3D Model Pack from Zelda Capital\Twilight Princess 3D Model Pack from Zelda Capital\Postman\PostSS01.tga
+map_d F:\\alte festplatte\\zelda objekte\\Twilight Princess 3D Model Pack from Zelda Capital\\Twilight Princess 3D Model Pack from Zelda Capital\\Postman\\PostSS01.tga
+
+newmtl m0.001
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.470588 0.470588 0.470588
+Ks 0.449020 0.449020 0.449020
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd F:\alte festplatte\zelda objekte\Twilight Princess 3D Model Pack from Zelda Capital\Twilight Princess 3D Model Pack from Zelda Capital\Goron\GoroSS01.tga
+map_d F:\\alte festplatte\\zelda objekte\\Twilight Princess 3D Model Pack from Zelda Capital\\Twilight Princess 3D Model Pack from Zelda Capital\\Goron\\GoroSS01.tga
+
+newmtl m1
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.470588 0.470588 0.470588
+Ks 0.449020 0.449020 0.449020
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd F:\alte festplatte\zelda objekte\Twilight Princess 3D Model Pack from Zelda Capital\Twilight Princess 3D Model Pack from Zelda Capital\Postman\PostSS07.tga
+map_d F:\\alte festplatte\\zelda objekte\\Twilight Princess 3D Model Pack from Zelda Capital\\Twilight Princess 3D Model Pack from Zelda Capital\\Postman\\PostSS07.tga
+
+newmtl m2
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.470588 0.470588 0.470588
+Ks 0.449020 0.449020 0.449020
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd F:\alte festplatte\zelda objekte\Twilight Princess 3D Model Pack from Zelda Capital\Twilight Princess 3D Model Pack from Zelda Capital\Postman\PostSS00.tga
+map_d F:\\alte festplatte\\zelda objekte\\Twilight Princess 3D Model Pack from Zelda Capital\\Twilight Princess 3D Model Pack from Zelda Capital\\Postman\\PostSS00.tga
+
+newmtl m3
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 0.470588 0.470588 0.470588
+Ks 0.449020 0.449020 0.449020
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd F:\alte festplatte\zelda objekte\Twilight Princess 3D Model Pack from Zelda Capital\Twilight Princess 3D Model Pack from Zelda Capital\Postman\PostMM08.tga
+map_d F:\\alte festplatte\\zelda objekte\\Twilight Princess 3D Model Pack from Zelda Capital\\Twilight Princess 3D Model Pack from Zelda Capital\\Postman\\PostMM08.tga
