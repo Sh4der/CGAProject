@@ -157,7 +157,9 @@ class Scene(private val window: GameWindow) {
 
     fun onMouseMove(xpos: Double, ypos: Double) {
 
-        cam.rotateAroundPoint((oldMousePosY-ypos).toFloat() * 0.002f, (oldMousePosX - xpos).toFloat() * 0.002f, 0f, Vector3f(0f))
+        //cam.rotateAroundPoint((oldMousePosY-ypos).toFloat() * 0.002f, (oldMousePosX - xpos).toFloat() * 0.002f, 0f, Vector3f(0f))
+        cam.rotateAroundPoint(0f, (oldMousePosX - xpos).toFloat() * 0.002f, 0f, Vector3f(0f))
+
         oldMousePosX = xpos
         oldMousePosY = ypos
     }

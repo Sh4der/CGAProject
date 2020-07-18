@@ -45,10 +45,10 @@ void main(){
     vertexData.position = worldPosition.xyz;
     vertexData.textureCoord = tcMultiplier * textureCoord;
 
-    vertexData.normal = (inverseTransposeViewMatrix * model_matrix * vec4(normal, 0f)).xyz;
+    vertexData.normal = (inverseTransposeViewMatrix * model_matrix * vec4(normal, 0.0f)).xyz;
 
-    toLight = (inverseTransposeViewMatrix * vec4(pointLightPosition, 1f)).xyz - (inverseTransposeViewMatrix * worldPosition).xyz;
-    toSpotLight = (inverseTransposeViewMatrix * vec4(spotLightPosition, 1f)).xyz - (inverseTransposeViewMatrix * worldPosition).xyz;
+    toLight = (inverseTransposeViewMatrix * vec4(pointLightPosition, 1.0f)).xyz - (inverseTransposeViewMatrix * worldPosition).xyz;
+    toSpotLight = (inverseTransposeViewMatrix * vec4(spotLightPosition, 1.0f)).xyz - (inverseTransposeViewMatrix * worldPosition).xyz;
     toCamera = - positionInCameraSpace.xyz;
-    viewSpotLightDirection = (inverseTransposeViewMatrix * vec4(spotLightDirection, 0f)).xyz;
+    viewSpotLightDirection = (inverseTransposeViewMatrix * vec4(spotLightDirection, 0.0f)).xyz;
 }
