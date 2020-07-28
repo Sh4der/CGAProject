@@ -5,7 +5,6 @@ import cga.framework.GLError.checkEx
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.EXTTextureFilterAnisotropic
 import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.GL_TEXTURE_2D
 import org.lwjgl.opengl.GL13
 import org.lwjgl.opengl.GL30
 import org.lwjgl.stb.STBImage
@@ -15,17 +14,30 @@ import java.nio.ByteBuffer
 /**
  * Created by Fabian on 16.09.2017.
  */
-class Texture2D(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Boolean): ITexture{
-    private var texID: Int = -1
+class Texture2D: ITexture{
+    var texID: Int = -1
         private set
 
-    init {
+    constructor(imageData: ByteBuffer?, width: Int, height: Int, genMipMaps: Boolean)
+    {
         try {
-            processTexture(imageData, width, height, genMipMaps); GLError.checkThrow()
+            processTexture(imageData, width, height, genMipMaps, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE); GLError.checkThrow()
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
         }
     }
+
+    constructor(imageData: ByteBuffer?, width: Int, height: Int, genMipMaps: Boolean, internalformat : Int, format : Int, type : Int)
+    {
+        try {
+            processTexture(imageData, width, height, genMipMaps, internalformat, format, type); GLError.checkThrow()
+        } catch (ex: java.lang.Exception) {
+            ex.printStackTrace()
+        }
+    }
+
+
+
     companion object {
         //create texture from file
         //don't support compressed textures for now
@@ -50,21 +62,18 @@ class Texture2D(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Bool
         }
     }
 
-    override fun processTexture(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Boolean) {
-        // todo 3.1
+    override fun processTexture(imageData: ByteBuffer?, width: Int, height: Int, genMipMaps: Boolean, internalformat : Int, format: Int, type : Int) {
         texID = GL11.glGenTextures(); GLError.checkThrow()
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, texID); GLError.checkThrow()
-        GL11.glTexImage2D(GL_TEXTURE_2D, 0, GL11.GL_RGBA8, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, imageData); GLError.checkThrow()
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, imageData); GLError.checkThrow()
 
         if(genMipMaps)
-            GL30.glGenerateMipmap(GL_TEXTURE_2D)
+            GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D)
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0); GLError.checkThrow()
-
     }
 
     override fun setTexParams(wrapS: Int, wrapT: Int, minFilter: Int, magFilter: Int) {
-        // todo 3.1
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, texID); GLError.checkThrow()
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, wrapS)
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, wrapT)
@@ -79,14 +88,24 @@ class Texture2D(imageData: ByteBuffer, width: Int, height: Int, genMipMaps: Bool
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0); GLError.checkThrow()
     }
 
+    override fun setTexParams(minFilter: Int, magFilter: Int) {
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texID); GLError.checkThrow()
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, minFilter)
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, magFilter)
+
+        GL11.glTexParameterf(GL11.GL_TEXTURE_2D,
+                EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                16.0f)
+
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0); GLError.checkThrow()
+    }
+
     override fun bind(textureUnit: Int) {
-        // todo 3.1
         GL13.glActiveTexture(GL13.GL_TEXTURE0 + textureUnit)
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, texID)
     }
 
     override fun unbind() {
-        // todo 3.1
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0)
     }
 

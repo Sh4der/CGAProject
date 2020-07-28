@@ -14,7 +14,7 @@ import org.lwjgl.opengl.*
  *
  * Created by Fabian on 16.09.2017.
  */
-class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<VertexAttribute>, val material: Material) {
+class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<VertexAttribute>, val material: Material?) {
     //private data
     private var vao = 0
     private var vbo = 0
@@ -27,7 +27,7 @@ class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<Vertex
 
         // todo: generate IDs
         vao = GL30.glGenVertexArrays()
-        GL30.glBindVertexArray(vao);
+        GL30.glBindVertexArray(vao)
 
         ibo = GL15.glGenBuffers()
         GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, ibo)
@@ -72,9 +72,9 @@ class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<Vertex
      * renders the mesh
      */
     fun render(shaderProgram : ShaderProgram) {
-        material.bind(shaderProgram)
+        material?.bind(shaderProgram)
         render()
-        material.unbind()
+        material?.unbind()
     }
 
     /**

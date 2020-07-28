@@ -1,6 +1,7 @@
 package cga.exercise.game
 
 import cga.exercise.components.camera.TronCamera
+import cga.exercise.components.framebuffer.GeometryFramebuffer
 import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
 import cga.exercise.components.geometry.Renderable
@@ -15,13 +16,18 @@ import cga.framework.ModelLoader
 import cga.framework.OBJLoader
 import cga.framework.OBJLoader.OBJMesh
 import cga.framework.OBJLoader.OBJResult
-import org.joml.*
+import org.joml.Math
+import org.joml.Vector2f
+import org.joml.Vector3f
+import org.joml.Vector3i
 import org.lwjgl.glfw.GLFW
+import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*
-import java.io.File
-import javax.sound.sampled.AudioInputStream
-import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.Clip
+import org.lwjgl.opengl.GL12
+import org.lwjgl.opengl.GL13
+import org.lwjgl.opengl.GL30
+import java.nio.ByteBuffer
+import javax.swing.Spring.height
 import kotlin.system.exitProcess
 
 
@@ -29,7 +35,10 @@ import kotlin.system.exitProcess
  * Created by Fabian on 16.09.2017.
  */
 class Scene(private val window: GameWindow) {
+
     private val staticShader: ShaderProgram
+    private val gBufferShader : ShaderProgram
+    private val screenShader : ShaderProgram
 
     private val cam : TronCamera
 
@@ -39,13 +48,21 @@ class Scene(private val window: GameWindow) {
     private var pointLight : PointLight
     private var spotLight : SpotLight
 
+    private val screenQuadMesh : Mesh
+
+    val testTex :Texture2D
+
+    private var currentImage :Int
+
+    private val gBufferObject : GeometryFramebuffer
+
     //scene setup
     init {
 
         //initial opengl state
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
+        glClearColor(1.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glDisable(GL_CULL_FACE); GLError.checkThrow()
-        glEnable(GL_DEPTH_TEST); GLError.checkThrow()
+        //glEnable(GL_DEPTH_TEST); GLError.checkThrow()
         glDepthFunc(GL_LESS); GLError.checkThrow()
 
         glEnable(GL_CULL_FACE); GLError.checkThrow()
@@ -53,6 +70,8 @@ class Scene(private val window: GameWindow) {
         glCullFace(GL_BACK); GLError.checkThrow()
 
         staticShader = ShaderProgram("assets/shaders/tron_vert.glsl", "assets/shaders/tron_frag.glsl")
+        gBufferShader = ShaderProgram("assets/shaders/g_Buffer_vert.glsl", "assets/shaders/g_Buffer_frag.glsl")
+        screenShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/screen_frag.glsl")
 
         //Create the mesh
         val stride: Int = 8 * 4
@@ -77,7 +96,7 @@ class Scene(private val window: GameWindow) {
         emitTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         val specTex = Texture2D("assets/textures/ground_spec.png", true)
         specTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
-
+        println(emitTex.texID)
         val groundMaterial = Material(diffTex,
                                     emitTex,
                                     specTex,
@@ -92,8 +111,7 @@ class Scene(private val window: GameWindow) {
         val meshGround = Mesh(groundMesh.vertexData, groundMesh.indexData, vertexAttributes, groundMaterial)
 
         ground = Renderable(mutableListOf(meshGround))
-        ground.meshes[0].material.emitColor = Vector3f(0f, 1f, 0f)
-
+        ground.meshes[0].material?.emitColor = Vector3f(0f, 1f, 0f)
 
 
         cam = TronCamera()
@@ -108,23 +126,67 @@ class Scene(private val window: GameWindow) {
         spotLight = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
 
         spotLight.parent = lightCycle
+
+
+        val quadArray = floatArrayOf(
+                -1f, -1f,  0f, 0f,
+                1f, 1f, 1f, 1f,
+                -1f, 1f,  0f, 1f,
+                1f, -1f, 1f, 0f
+        )
+
+        val quadIndices = intArrayOf(
+                0, 1, 2,
+                0, 3, 1
+        )
+
+
+        //Create the mesh
+        val strideScreenQuad: Int = 4 * 4
+        val attrPosScreenQuad = VertexAttribute(2, GL_FLOAT, strideScreenQuad, 0) //position
+        val attrTCScreenQuad = VertexAttribute(2, GL_FLOAT, strideScreenQuad, 2 * 4) //textureCoordinate
+        val vertexAttributesScreenQuad = arrayOf<VertexAttribute>(attrPosScreenQuad, attrTCScreenQuad)
+
+        screenQuadMesh = Mesh(quadArray, quadIndices, vertexAttributesScreenQuad, null)
+
+
+        testTex = Texture2D("assets/textures/index.jpg", false)
+        testTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST)
+
+
+        gBufferObject = GeometryFramebuffer(window.framebufferWidth, window.framebufferHeight)
+        currentImage = gBufferObject.gPosition.texID
+
     }
 
     fun render(dt: Float, t: Float) {
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-        staticShader.use()
-        cam.bind(staticShader)
-        pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader, "spotLight", Matrix4f())
-        ground.render(staticShader)
-        lightCycle?.render(staticShader)
+
+
+        gBufferObject.startRender(gBufferShader)
+        cam.bind(gBufferShader); GLError.checkThrow()
+        ground.render(gBufferShader); GLError.checkThrow()
+        lightCycle?.render(gBufferShader); GLError.checkThrow()
+        gBufferObject.stopRender()
+
+
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
+        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
+        glDisable(GL_DEPTH_TEST)
+        screenShader.use(); GLError.checkThrow()
+        //testTex.bind(0)
+        //screenShader.setUniform("specTex", 0)
+        GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, currentImage)
+        screenShader.setUniform("tex", 0)
+        screenQuadMesh.render(); GLError.checkThrow()
     }
 
 
     fun update(dt: Float, t: Float) {
-        var speed = 0f;
+        var speed = 0f
         var rotationDirection = 0f
-        var turningCycleRadius = 3f
+        val turningCycleRadius = 3f
 
         if(window.getKeyState(GLFW.GLFW_KEY_W)) {
             speed = -5f
@@ -148,17 +210,24 @@ class Scene(private val window: GameWindow) {
         }
         lightCycle?.meshes?.get(2)?.material?.emitColor = Vector3f((Math.sin(t) + 1f)/2, (Math.sin(t*2) + 1f)/2, (Math.sin(t*3) + 1f)/2)
 
+        if(window.getKeyState(GLFW.GLFW_KEY_1)) {
+            currentImage = gBufferObject.gPosition.texID
+        }else if(window.getKeyState(GLFW.GLFW_KEY_2)) {
+            currentImage = gBufferObject.gNormal.texID
+        }else if(window.getKeyState(GLFW.GLFW_KEY_3)) {
+            currentImage = gBufferObject.gAlbedo.texID
+        }
     }
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
 
-    var oldMousePosX = 0.0;
-    var oldMousePosY = 0.0;
+    var oldMousePosX = 0.0
+    var oldMousePosY = 0.0
 
     fun onMouseMove(xpos: Double, ypos: Double) {
 
         //cam.rotateAroundPoint((oldMousePosY-ypos).toFloat() * 0.002f, (oldMousePosX - xpos).toFloat() * 0.002f, 0f, Vector3f(0f))
-        cam.rotateAroundPoint(0f, (oldMousePosX - xpos).toFloat() * 0.002f, 0f, Vector3f(0f))
+        cam.rotateAroundPoint(0f, (oldMousePosX - xpos).toFloat() * 0.02f, 0f, Vector3f(0f))
 
         oldMousePosX = xpos
         oldMousePosY = ypos
