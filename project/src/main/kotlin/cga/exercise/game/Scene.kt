@@ -1,7 +1,9 @@
 package cga.exercise.game
 
 import cga.exercise.components.camera.TronCamera
+import cga.exercise.components.framebuffer.BlurFramebuffer
 import cga.exercise.components.framebuffer.GeometryFramebuffer
+import cga.exercise.components.framebuffer.SSAOTextureFramebuffer
 import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
 import cga.exercise.components.geometry.Renderable
@@ -21,13 +23,8 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.Vector3i
 import org.lwjgl.glfw.GLFW
-import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL12
 import org.lwjgl.opengl.GL13
-import org.lwjgl.opengl.GL30
-import java.nio.ByteBuffer
-import javax.swing.Spring.height
 import kotlin.system.exitProcess
 
 
@@ -39,6 +36,9 @@ class Scene(private val window: GameWindow) {
     private val staticShader: ShaderProgram
     private val gBufferShader : ShaderProgram
     private val screenShader : ShaderProgram
+    private val ssaoColorShader : ShaderProgram
+    private val blurShader : ShaderProgram
+    private val lightningShader : ShaderProgram
 
     private val cam : TronCamera
 
@@ -52,9 +52,11 @@ class Scene(private val window: GameWindow) {
 
     val testTex :Texture2D
 
-    private var currentImage :Int
+    private var currentImage : Texture2D
 
     private val gBufferObject : GeometryFramebuffer
+    private val ssaoTextureFramebuffer :SSAOTextureFramebuffer
+    private val blurFramebuffer : BlurFramebuffer
 
     //scene setup
     init {
@@ -71,7 +73,11 @@ class Scene(private val window: GameWindow) {
 
         staticShader = ShaderProgram("assets/shaders/tron_vert.glsl", "assets/shaders/tron_frag.glsl")
         gBufferShader = ShaderProgram("assets/shaders/g_Buffer_vert.glsl", "assets/shaders/g_Buffer_frag.glsl")
+        ssaoColorShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoColor_frag.glsl")
+        blurShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoBlur_frag.glsl")
+        lightningShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoLightning_frag.glsl")
         screenShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/screen_frag.glsl")
+
 
         //Create the mesh
         val stride: Int = 8 * 4
@@ -155,7 +161,9 @@ class Scene(private val window: GameWindow) {
 
 
         gBufferObject = GeometryFramebuffer(window.framebufferWidth, window.framebufferHeight)
-        currentImage = gBufferObject.gPosition.texID
+        ssaoTextureFramebuffer = SSAOTextureFramebuffer(window.framebufferWidth, window.framebufferHeight)
+        blurFramebuffer = BlurFramebuffer(window.framebufferWidth, window.framebufferHeight)
+        currentImage = ssaoTextureFramebuffer.ssaoColorTexture
 
     }
 
@@ -168,18 +176,27 @@ class Scene(private val window: GameWindow) {
         lightCycle?.render(gBufferShader); GLError.checkThrow()
         gBufferObject.stopRender()
 
+        ssaoTextureFramebuffer.startRender(ssaoColorShader, gBufferObject)
+        cam.bind(ssaoColorShader)
+        screenQuadMesh.render()
+        ssaoTextureFramebuffer.stopRender()
+
+        blurFramebuffer.startRender(blurShader, ssaoTextureFramebuffer)
+        screenQuadMesh.render()
+        blurFramebuffer.stopRender()
 
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
         glDisable(GL_DEPTH_TEST)
         screenShader.use(); GLError.checkThrow()
-        //testTex.bind(0)
-        //screenShader.setUniform("specTex", 0)
-        GL13.glActiveTexture(GL13.GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, currentImage)
+        currentImage.bind(0)
         screenShader.setUniform("tex", 0)
         screenQuadMesh.render(); GLError.checkThrow()
+
+
+
+
     }
 
 
@@ -211,11 +228,17 @@ class Scene(private val window: GameWindow) {
         lightCycle?.meshes?.get(2)?.material?.emitColor = Vector3f((Math.sin(t) + 1f)/2, (Math.sin(t*2) + 1f)/2, (Math.sin(t*3) + 1f)/2)
 
         if(window.getKeyState(GLFW.GLFW_KEY_1)) {
-            currentImage = gBufferObject.gPosition.texID
+            currentImage = gBufferObject.gPosition
         }else if(window.getKeyState(GLFW.GLFW_KEY_2)) {
-            currentImage = gBufferObject.gNormal.texID
+            currentImage = gBufferObject.gNormal
         }else if(window.getKeyState(GLFW.GLFW_KEY_3)) {
-            currentImage = gBufferObject.gAlbedo.texID
+            currentImage = gBufferObject.gAlbedo
+        }else if(window.getKeyState(GLFW.GLFW_KEY_4)) {
+            currentImage = ssaoTextureFramebuffer.ssaoNoiseTexture
+        }else if(window.getKeyState(GLFW.GLFW_KEY_5)) {
+            currentImage = ssaoTextureFramebuffer.ssaoColorTexture
+        }else if(window.getKeyState(GLFW.GLFW_KEY_6)) {
+            currentImage = blurFramebuffer.blurFRamebufferTexture
         }
     }
 
