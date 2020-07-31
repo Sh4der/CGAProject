@@ -170,6 +170,7 @@ class Scene(private val window: GameWindow) {
 
     fun render(dt: Float, t: Float) {
 
+        //------------------------Lukas---------------------//
 
         gBufferObject.startRender(gBufferShader)
         cam.bind(gBufferShader); GLError.checkThrow()
@@ -186,17 +187,9 @@ class Scene(private val window: GameWindow) {
         screenQuadMesh.render()
         blurFramebuffer.stopRender()
 
-
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
-        staticShader.use()
-        cam.bind(staticShader)
-        pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader,"spotLight", Matrix4f())
-
-
-        lightCycle?.render(staticShader)
-        ground.render(staticShader)
-
+        //
+        //Rendert auf den Bildschirm kann aus kommentiert werden
+        //
         /*glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
         glDisable(GL_DEPTH_TEST)
@@ -207,6 +200,22 @@ class Scene(private val window: GameWindow) {
         glBindTexture(GL_TEXTURE_2D, currentImage)
         screenShader.setUniform("tex", 0)
         screenQuadMesh.render(); GLError.checkThrow()*/
+
+
+        //------------------------Janine---------------------//
+
+        //
+        //Rendert auf den Bildschirm kann aus kommentiert werden
+        //
+        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
+        staticShader.use()
+        cam.bind(staticShader)
+        pointLight.bind(staticShader, "pointLight")
+        spotLight.bind(staticShader,"spotLight", Matrix4f())
+        lightCycle?.render(staticShader)
+        ground.render(staticShader)
+
+
     }
 
 
