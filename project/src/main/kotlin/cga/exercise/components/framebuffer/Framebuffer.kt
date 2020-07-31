@@ -39,7 +39,6 @@ abstract class Framebuffer(val width : Int, val height : Int) {
         createFrameBuffer(); GLError.checkThrow()
         bind(); GLError.checkThrow()
         configureFramebuffer(); GLError.checkThrow()
-
         GL30.glDrawBuffers(allAttachments.toIntArray())
 
         if(GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER) != GL30.GL_FRAMEBUFFER_COMPLETE){
@@ -60,7 +59,7 @@ abstract class Framebuffer(val width : Int, val height : Int) {
      * here we do the init like clear or lgenable for the Framebuffer
      *
      */
-    protected abstract fun initRender()
+    protected abstract fun initRender(shader : ShaderProgram)
 
     /**
      * This method creates a new FRamebuffer and saves the id in framebufferID
@@ -78,8 +77,8 @@ abstract class Framebuffer(val width : Int, val height : Int) {
     fun startRender(shader : ShaderProgram)
     {
         bind()
-        initRender()
         shader.use()
+        initRender(shader)
     }
 
     /**
@@ -107,12 +106,24 @@ abstract class Framebuffer(val width : Int, val height : Int) {
     }
 
     /**
-     * this creates a new texture on attachment (attachment). You can set Mipmaps on or off
+     * this creates a new texture on attachment (attachment). You can set Mipmaps on or off. The Texture formats are default
      * @param attachment Int
      * @param genMipMap Boolean
      * @return Texture2D
      */
-    protected fun createTextureAttachment(attachment : Int, genMipMap : Boolean) : Texture2D
+    protected fun createTextureAttachment(attachment : Int, genMipMap : Boolean) : Texture2D = createTextureAttachment(attachment, genMipMap,  GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE)
+
+
+    /**
+     * this creates a new texture on attachment (attachment). You can set Mipmaps on or off. The Texture format and type can be configured
+     * @param attachment Int
+     * @param genMipMap Boolean
+     * @param internalformat Int
+     * @param format Int
+     * @param type Int
+     * @return Texture2D
+     */
+    protected fun createTextureAttachment(attachment : Int, genMipMap : Boolean, internalformat : Int, format : Int, type : Int) : Texture2D
     {
         val tex = Texture2D(null as ByteBuffer?, width, height, genMipMap); GLError.checkThrow()
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex.texID); GLError.checkThrow()

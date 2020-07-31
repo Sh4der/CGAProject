@@ -10,6 +10,9 @@ in struct VertexData
     vec3 normal;
 } vertexdata;
 
+uniform sampler2D emitTex;
+
+
 void main()
 {
     // store the fragment position vector in the first gbuffer texture
@@ -18,5 +21,6 @@ void main()
     // also store the per-fragment normals into the gbuffer
     outNormal = normalize(vertexdata.normal);
     // and the diffuse per-fragment color
-    outAlbedo.rgb = vec3(0.95);
+    //outAlbedo.rgb = vec3(0.95);
+    outAlbedo.rgb = texture(emitTex, vertexdata.texCoords).rgb;
 }

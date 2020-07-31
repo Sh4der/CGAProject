@@ -83,6 +83,27 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
     }
 
     /**
+     * Sets a single vec3f uniform
+     * @param name  Name of the uniform variable in the shader
+     * @param value Value
+     * @return returns false if the uniform was not found in the shader
+     */
+    fun setUniform(name: String, value: ArrayList<Vector3f>): Boolean {
+        if (programID == 0) return false
+        for (i in value.indices)
+        {
+            val loc = GL20.glGetUniformLocation(programID, "$name[$i]")
+            if (loc != -1) {
+                GL20.glUniform3f(loc, value[i].x, value[i].y, value[i].z)
+            }
+            else
+                return false
+        }
+
+        return true
+    }
+
+    /**
      * Sets a single vec3i uniform
      * @param name  Name of the uniform variable in the shader
      * @param value Value

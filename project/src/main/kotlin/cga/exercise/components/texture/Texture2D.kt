@@ -18,16 +18,20 @@ class Texture2D: ITexture{
     var texID: Int = -1
         private set
 
-    constructor(imageData: ByteBuffer?, width: Int, height: Int, genMipMaps: Boolean)
+    constructor(imageData: ByteBuffer?, width: Int, height: Int, genMipMaps: Boolean) : this(imageData, width, height, genMipMaps, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE)
+
+    constructor(imageData: ByteBuffer?, width: Int, height: Int, genMipMaps: Boolean, internalformat : Int, format : Int, type : Int)
     {
         try {
-            processTexture(imageData, width, height, genMipMaps, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE); GLError.checkThrow()
+            processTexture(imageData, width, height, genMipMaps, internalformat, format, type); GLError.checkThrow()
         } catch (ex: java.lang.Exception) {
             ex.printStackTrace()
         }
     }
 
-    constructor(imageData: ByteBuffer?, width: Int, height: Int, genMipMaps: Boolean, internalformat : Int, format : Int, type : Int)
+    constructor(imageData: FloatArray?, width: Int, height: Int, genMipMaps: Boolean) : this(imageData, width, height, genMipMaps, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE)
+
+    constructor(imageData: FloatArray?, width: Int, height: Int, genMipMaps: Boolean, internalformat : Int, format : Int, type : Int)
     {
         try {
             processTexture(imageData, width, height, genMipMaps, internalformat, format, type); GLError.checkThrow()
@@ -63,6 +67,17 @@ class Texture2D: ITexture{
     }
 
     override fun processTexture(imageData: ByteBuffer?, width: Int, height: Int, genMipMaps: Boolean, internalformat : Int, format: Int, type : Int) {
+        texID = GL11.glGenTextures(); GLError.checkThrow()
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texID); GLError.checkThrow()
+        GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, imageData); GLError.checkThrow()
+
+        if(genMipMaps)
+            GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D)
+
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0); GLError.checkThrow()
+    }
+
+    override fun processTexture(imageData: FloatArray?, width: Int, height: Int, genMipMaps: Boolean, internalformat : Int, format: Int, type : Int) {
         texID = GL11.glGenTextures(); GLError.checkThrow()
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, texID); GLError.checkThrow()
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, imageData); GLError.checkThrow()
