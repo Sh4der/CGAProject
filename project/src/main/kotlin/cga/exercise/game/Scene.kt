@@ -16,10 +16,7 @@ import cga.framework.ModelLoader
 import cga.framework.OBJLoader
 import cga.framework.OBJLoader.OBJMesh
 import cga.framework.OBJLoader.OBJResult
-import org.joml.Math
-import org.joml.Vector2f
-import org.joml.Vector3f
-import org.joml.Vector3i
+import org.joml.*
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*
@@ -170,8 +167,19 @@ class Scene(private val window: GameWindow) {
 
 
 
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
-        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
+        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
+        staticShader.use()
+        cam.bind(staticShader)
+        pointLight.bind(staticShader, "pointLight")
+        spotLight.bind(staticShader,"spotLight", Matrix4f())
+
+
+        lightCycle?.render(staticShader)
+        ground.render(staticShader)
+
+        /*
         glDisable(GL_DEPTH_TEST)
         screenShader.use(); GLError.checkThrow()
         //testTex.bind(0)
@@ -180,6 +188,7 @@ class Scene(private val window: GameWindow) {
         glBindTexture(GL_TEXTURE_2D, currentImage)
         screenShader.setUniform("tex", 0)
         screenQuadMesh.render(); GLError.checkThrow()
+        */
     }
 
 
