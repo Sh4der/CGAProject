@@ -18,13 +18,15 @@ import cga.framework.ModelLoader
 import cga.framework.OBJLoader
 import cga.framework.OBJLoader.OBJMesh
 import cga.framework.OBJLoader.OBJResult
-import org.joml.Math
-import org.joml.Vector2f
-import org.joml.Vector3f
-import org.joml.Vector3i
+import org.joml.*
 import org.lwjgl.glfw.GLFW
+import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL12
 import org.lwjgl.opengl.GL13
+import org.lwjgl.opengl.GL30
+import java.nio.ByteBuffer
+import javax.swing.Spring.height
 import kotlin.system.exitProcess
 
 
@@ -77,7 +79,6 @@ class Scene(private val window: GameWindow) {
         blurShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoBlur_frag.glsl")
         lightningShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoLightning_frag.glsl")
         screenShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/screen_frag.glsl")
-
 
         //Create the mesh
         val stride: Int = 8 * 4
@@ -186,17 +187,26 @@ class Scene(private val window: GameWindow) {
         blurFramebuffer.stopRender()
 
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
+        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
+        staticShader.use()
+        cam.bind(staticShader)
+        pointLight.bind(staticShader, "pointLight")
+        spotLight.bind(staticShader,"spotLight", Matrix4f())
+
+
+        lightCycle?.render(staticShader)
+        ground.render(staticShader)
+
+        /*glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
         glDisable(GL_DEPTH_TEST)
         screenShader.use(); GLError.checkThrow()
-        currentImage.bind(0)
+        //testTex.bind(0)
+        //screenShader.setUniform("specTex", 0)
+        GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, currentImage)
         screenShader.setUniform("tex", 0)
-        screenQuadMesh.render(); GLError.checkThrow()
-
-
-
-
+        screenQuadMesh.render(); GLError.checkThrow()*/
     }
 
 
