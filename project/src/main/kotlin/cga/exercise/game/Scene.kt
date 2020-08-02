@@ -196,8 +196,9 @@ class Scene(private val window: GameWindow) {
         screenShader.use(); GLError.checkThrow()
         //testTex.bind(0)
         //screenShader.setUniform("specTex", 0)
-        GL13.glActiveTexture(GL13.GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, currentImage)
+        //GL13.glActiveTexture(GL13.GL_TEXTURE0)
+        //glBindTexture(GL_TEXTURE_2D, currentImage)
+        currentImage.bind(0)
         screenShader.setUniform("tex", 0)
         screenQuadMesh.render(); GLError.checkThrow()*/
 
