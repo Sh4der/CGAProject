@@ -1,5 +1,6 @@
 package cga.exercise.components.gameobjects
 
+import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.framebuffer.GeometryFramebuffer
 import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
@@ -14,7 +15,7 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11
 
-class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Float = 0.0f, var y: Float = 0.0f, var z: Float = 0.0f, var rotx: Float = -90f, var roty: Float = 180f, var rotz: Float = 90f) {
+class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Float = 0.0f, var y: Float = 0.0f, var z: Float = 0.0f, var rotx: Float = 90f, var roty: Float = 180f, var rotz: Float = 90f) {
     /*
     What does a portal need?
     - 3d Object (Wall)
@@ -28,7 +29,8 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
     private var framebuffer : GeometryFramebuffer
     private var portalTexture : Texture2D
     private var portalMaterial : Material
-    private val portalWall : Renderable
+    val portalWall : Renderable
+    private val camera : TronCamera
 
 
     init {
@@ -55,11 +57,20 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
 
         //Test transformations
         portalWall.rotateLocal(rotx,roty,rotz)
-        portalWall.translateGlobal(Vector3f(x,y, z))
+        portalWall.translateGlobal(Vector3f(x,y,z))
         portalWall.scaleLocal(Vector3f(0.1f,0.1f,0.1f))
 
         //Create Framebuffer
         framebuffer = GeometryFramebuffer(window.framebufferWidth, window.framebufferHeight)
+
+        //Define camera
+        camera = TronCamera()
+        camera.rotateLocal(rotx,0f,0f)
+        camera.translateGlobal(Vector3f(0f))
+    }
+
+    fun setCameraParent(p: Renderable) {
+        camera.parent = p
     }
 
     fun generateTexture() {
@@ -72,6 +83,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
 
     fun renderToFramebufferStart(shaderProgram: ShaderProgram) {
         framebuffer.startRender(shaderProgram)
+        camera.bind(shaderProgram)
     }
 
     fun renderToFramebufferStop() {

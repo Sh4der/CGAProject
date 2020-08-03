@@ -177,8 +177,8 @@ class Scene(private val window: GameWindow) {
 
 
         //Portal Setup
-        portal1 = Portal(window, screenShader,-22f, 2.2f, 0f)
-        portal2 = Portal(window, screenShader,22f, 2.2f, 0f, 90f, 0f, 90f)
+        portal1 = Portal(window, screenShader,-5f, 2.2f, 0f, 90f, 180f, 90f)
+        portal2 = Portal(window, screenShader,5f, 2.2f, 0f, 90f, 0f, 90f)
 
     }
 
@@ -232,7 +232,11 @@ class Scene(private val window: GameWindow) {
 
 
         //------------------------Nico---------------------//
+        //Set the cameras for the two portals
+        portal1.setCameraParent(portal2.portalWall)
+        portal2.setCameraParent(portal1.portalWall)
 
+        //Render Texture from portal cameras
         portal1.generateTexture()
         portal2.generateTexture()
 
@@ -240,7 +244,7 @@ class Scene(private val window: GameWindow) {
         //Render auf FBO -> Portals
         //
         portal1.renderToFramebufferStart(staticShader)
-        cam.bind(staticShader)
+        //cam.bind(staticShader)
         pointLight.bind(staticShader, "pointLight")
         spotLight.bind(staticShader,"spotLight", Matrix4f())
         lightCycle?.render(staticShader)
@@ -250,7 +254,7 @@ class Scene(private val window: GameWindow) {
         portal1.renderToFramebufferStop()
 
         portal2.renderToFramebufferStart(staticShader)
-        cam.bind(staticShader)
+        //cam.bind(staticShader)
         pointLight.bind(staticShader, "pointLight")
         spotLight.bind(staticShader,"spotLight", Matrix4f())
         lightCycle?.render(staticShader)
