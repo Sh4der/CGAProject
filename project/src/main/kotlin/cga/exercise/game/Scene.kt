@@ -75,9 +75,9 @@ class Scene(private val window: GameWindow) {
 
         staticShader = ShaderProgram("assets/shaders/tron_vert.glsl", "assets/shaders/tron_frag.glsl")
         gBufferShader = ShaderProgram("assets/shaders/g_Buffer_vert.glsl", "assets/shaders/g_Buffer_frag.glsl")
-        ssaoColorShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoColor_frag.glsl")
-        blurShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoBlur_frag.glsl")
-        lightningShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoLightning_frag.glsl")
+        ssaoColorShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/ssaoColor_frag.glsl")
+        blurShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/ssaoBlur_frag.glsl")
+        lightningShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/ssaoLightning_frag.glsl")
         screenShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/screen_frag.glsl")
 
         //Create the mesh
@@ -190,7 +190,7 @@ class Scene(private val window: GameWindow) {
         //
         //Rendert auf den Bildschirm kann aus kommentiert werden
         //
-        /*glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
         glDisable(GL_DEPTH_TEST)
         screenShader.use(); GLError.checkThrow()
@@ -200,7 +200,7 @@ class Scene(private val window: GameWindow) {
         //glBindTexture(GL_TEXTURE_2D, currentImage)
         currentImage.bind(0)
         screenShader.setUniform("tex", 0)
-        screenQuadMesh.render(); GLError.checkThrow()*/
+        screenQuadMesh.render(); GLError.checkThrow()
 
 
         //------------------------Janine---------------------//
@@ -208,13 +208,13 @@ class Scene(private val window: GameWindow) {
         //
         //Rendert auf den Bildschirm kann aus kommentiert werden
         //
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
+        /*glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
         staticShader.use()
         cam.bind(staticShader)
         pointLight.bind(staticShader, "pointLight")
         spotLight.bind(staticShader,"spotLight", Matrix4f())
         lightCycle?.render(staticShader)
-        ground.render(staticShader)
+        ground.render(staticShader)*/
 
 
     }
