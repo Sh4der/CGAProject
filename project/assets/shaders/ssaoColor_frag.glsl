@@ -2,6 +2,7 @@
 out float FragColor;
 
 in vec2 ioTexCoords;
+in vec2 ioPos;
 
 const int sampleCount = 64;
 const float radius = 0.5f;
@@ -17,6 +18,8 @@ uniform vec2 screenSize;
 
 void main()
 {
+
+
     // tile noise texture over screen, based on screen dimensions divided by noise size
     vec2 noiseScale = vec2(screenSize.x/4.0, screenSize.y/4.0);
 
@@ -24,7 +27,7 @@ void main()
     vec3 normal = texture(gNormal, ioTexCoords).rgb;
     vec3 randomVec = normalize(texture(texNoise, ioTexCoords * noiseScale).xyz);
 
-    //create TBN matrix to transform coords from tangentspace to cameracpace
+    //create TBN matrix to transform coords from tangentspace to view-space
     vec3 tangent = normalize(randomVec - normal * dot(randomVec, normal));
     vec3 bitangent = cross(normal, tangent);
     mat3 TBN = mat3(tangent, bitangent, normal);
@@ -47,5 +50,9 @@ void main()
 
     }
     occlusion = 1.0 - (occlusion / sampleCount);
-    FragColor =  occlusion;
+
+    //FragColor = vec4(texture(gPosition, ioTexCoords).xyz, 1.0f);
+    //FragColor = vec4(ioPos, 0.0f, 1.0f);
+    FragColor = occlusion;
+
 }

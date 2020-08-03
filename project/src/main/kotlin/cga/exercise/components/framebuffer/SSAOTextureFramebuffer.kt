@@ -32,6 +32,7 @@ class SSAOTextureFramebuffer(_width : Int, _height : Int) : Framebuffer(_width, 
 
     override fun configureFramebuffer() {
         ssaoColorTexture = createTextureAttachment(0, false, GL11.GL_RED, GL11.GL_RED, GL11.GL_FLOAT)
+        //ssaoColorTexture = createTextureAttachment(0, false)
         ssaoColorTexture.setTexParams(GL11.GL_NEAREST, GL11.GL_NEAREST)
 
         val ssaoNoise = ArrayList<Float>()
@@ -67,6 +68,8 @@ class SSAOTextureFramebuffer(_width : Int, _height : Int) : Framebuffer(_width, 
     }
 
     override fun initRender(shader: ShaderProgram) {
+        GL11.glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT); GLError.checkThrow()
+        GL11.glDisable(GL11.GL_DEPTH_TEST)
     }
 }
