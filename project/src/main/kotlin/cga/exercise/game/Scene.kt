@@ -12,6 +12,7 @@ import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.texture.Texture2D
+import cga.exercise.components.gameobjects.Portal
 import cga.framework.GLError
 import cga.framework.GameWindow
 import cga.framework.ModelLoader
@@ -59,6 +60,13 @@ class Scene(private val window: GameWindow) {
     private val gBufferObject : GeometryFramebuffer
     private val ssaoTextureFramebuffer :SSAOTextureFramebuffer
     private val blurFramebuffer : BlurFramebuffer
+
+
+
+    //Portal vars
+    private var portal1 : Portal
+    private var portal2 : Portal
+
 
     //scene setup
     init {
@@ -166,6 +174,11 @@ class Scene(private val window: GameWindow) {
         blurFramebuffer = BlurFramebuffer(window.framebufferWidth, window.framebufferHeight)
         currentImage = ssaoTextureFramebuffer.ssaoColorTexture
 
+
+        //Portal Setup
+        portal1 = Portal(window, screenShader,-5f, 2.2f, 0f, 90f, 180f, 90f)
+        portal2 = Portal(window, screenShader,5f, 2.2f, 0f, 90f, 0f, 90f)
+
     }
 
     fun render(dt: Float, t: Float) {
@@ -190,7 +203,7 @@ class Scene(private val window: GameWindow) {
         //
         //Rendert auf den Bildschirm kann aus kommentiert werden
         //
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
+        /*glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
         glDisable(GL_DEPTH_TEST)
         screenShader.use(); GLError.checkThrow()
@@ -200,7 +213,7 @@ class Scene(private val window: GameWindow) {
         //glBindTexture(GL_TEXTURE_2D, currentImage)
         currentImage.bind(0)
         screenShader.setUniform("tex", 0)
-        screenQuadMesh.render(); GLError.checkThrow()
+        screenQuadMesh.render(); GLError.checkThrow()*/
 
 
         //------------------------Janine---------------------//
@@ -215,6 +228,52 @@ class Scene(private val window: GameWindow) {
         spotLight.bind(staticShader,"spotLight", Matrix4f())
         lightCycle?.render(staticShader)
         ground.render(staticShader)*/
+
+
+        //------------------------Nico---------------------//
+        //Set the cameras for the two portals
+        portal1.setCameraParent(portal2.portalWall)
+        portal2.setCameraParent(portal1.portalWall)
+
+        //Render Texture from portal cameras
+        portal1.generateTexture()
+        portal2.generateTexture()
+
+        //
+        //Render auf FBO -> Portals
+        //
+        portal1.renderToFramebufferStart(staticShader)
+        //cam.bind(staticShader)
+        pointLight.bind(staticShader, "pointLight")
+        spotLight.bind(staticShader,"spotLight", Matrix4f())
+        lightCycle?.render(staticShader)
+        ground.render(staticShader)
+        portal1.render(staticShader)
+        portal2.render(staticShader)
+        portal1.renderToFramebufferStop()
+
+        portal2.renderToFramebufferStart(staticShader)
+        //cam.bind(staticShader)
+        pointLight.bind(staticShader, "pointLight")
+        spotLight.bind(staticShader,"spotLight", Matrix4f())
+        lightCycle?.render(staticShader)
+        ground.render(staticShader)
+        portal1.render(staticShader)
+        portal2.render(staticShader)
+        portal2.renderToFramebufferStop()
+
+        //
+        //Rendert auf den Bildschirm kann aus kommentiert werden
+        //
+        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
+        staticShader.use()
+        cam.bind(staticShader)
+        pointLight.bind(staticShader, "pointLight")
+        spotLight.bind(staticShader,"spotLight", Matrix4f())
+        lightCycle?.render(staticShader)
+        ground.render(staticShader)
+        portal1.render(staticShader)
+        portal2.render(staticShader)
 
 
     }

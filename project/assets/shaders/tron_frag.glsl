@@ -54,6 +54,8 @@ void main(){
 
     vec3 finalSpec = pointAttenuation * pow(brightnessSpecular, shininess) * texture(specTex, vertexData.textureCoord).rgb * pointLightColor;
 
+
+    //Spotlight
     float distanceToSpot = length(toSpotLight);
     float spotAttenuation = 1.0f / (spotLightConstantAttenuation + spotLightLinearAttenuation * distanceToLight + spotLightQuadraticAttenuation * (distanceToLight*distanceToLight));
 
@@ -69,6 +71,7 @@ void main(){
     vec3 finalSpotSpec = spotAttenuation * pow(brightnessSpotSpecular, shininess) * texture(specTex, vertexData.textureCoord).rgb * spotLightColor;
 
 
+    //Output
     vec3 ambient = 0.1f * pointLightColor * pointAttenuation;
     vec3 result = emitColor * texture(emitTex, vertexData.textureCoord).rgb + (ambient * finalDiff + finalSpec + finalSpotDiff);
 
