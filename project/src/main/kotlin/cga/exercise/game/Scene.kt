@@ -273,7 +273,6 @@ class Scene(private val window: GameWindow) {
         portal2.render(staticShader)
 
 
-
     }
 
 
