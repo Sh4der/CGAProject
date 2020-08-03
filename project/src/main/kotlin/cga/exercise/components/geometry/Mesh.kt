@@ -14,7 +14,7 @@ import org.lwjgl.opengl.*
  *
  * Created by Fabian on 16.09.2017.
  */
-class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<VertexAttribute>, val material: Material?) {
+class Mesh(vertexdata: FloatArray, indexdata: IntArray, attributes: Array<VertexAttribute>, var material: Material?) {
     //private data
     private var vao = 0
     private var vbo = 0

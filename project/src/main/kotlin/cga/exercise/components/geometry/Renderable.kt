@@ -14,6 +14,6 @@ class Renderable(val meshes : MutableList<Mesh>) : Transformable(), IRenderable{
             mesh.render(shaderProgram)
         }
 
-
     }
+
 }

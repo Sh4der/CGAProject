@@ -2,6 +2,7 @@ package cga.exercise.game
 
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.framebuffer.BlurFramebuffer
+import cga.exercise.components.framebuffer.Framebuffer
 import cga.exercise.components.framebuffer.GeometryFramebuffer
 import cga.exercise.components.framebuffer.SSAOTextureFramebuffer
 import cga.exercise.components.geometry.Material
@@ -12,6 +13,7 @@ import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
 import cga.exercise.components.shader.ShaderProgram
 import cga.exercise.components.texture.Texture2D
+import cga.exercise.components.gameobjects.Portal
 import cga.framework.GLError
 import cga.framework.GameWindow
 import cga.framework.ModelLoader
@@ -59,6 +61,13 @@ class Scene(private val window: GameWindow) {
     private val gBufferObject : GeometryFramebuffer
     private val ssaoTextureFramebuffer :SSAOTextureFramebuffer
     private val blurFramebuffer : BlurFramebuffer
+
+
+
+    //Portal vars
+    private var portal1 : Portal
+    private var portal2 : Portal
+
 
     //scene setup
     init {
@@ -123,7 +132,7 @@ class Scene(private val window: GameWindow) {
 
         cam = TronCamera()
         cam.rotateLocal(-35f, 0f, 0f)
-        cam.translateLocal(Vector3f(0f,  0f, 4f))
+        cam.translateLocal(Vector3f(0f,  0f, 6f))
 
         cam.parent = lightCycle!!
 
@@ -165,6 +174,11 @@ class Scene(private val window: GameWindow) {
         ssaoTextureFramebuffer = SSAOTextureFramebuffer(window.framebufferWidth, window.framebufferHeight)
         blurFramebuffer = BlurFramebuffer(window.framebufferWidth, window.framebufferHeight)
         currentImage = ssaoTextureFramebuffer.ssaoColorTexture
+
+
+        //Portal Setup
+        portal1 = Portal(window, screenShader,-22f, 2.2f, 0f)
+        portal2 = Portal(window, screenShader,22f, 2.2f, 0f, 90f, 0f, 90f)
 
     }
 
@@ -208,6 +222,46 @@ class Scene(private val window: GameWindow) {
         //
         //Rendert auf den Bildschirm kann aus kommentiert werden
         //
+        /*glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
+        staticShader.use()
+        cam.bind(staticShader)
+        pointLight.bind(staticShader, "pointLight")
+        spotLight.bind(staticShader,"spotLight", Matrix4f())
+        lightCycle?.render(staticShader)
+        ground.render(staticShader)*/
+
+
+        //------------------------Nico---------------------//
+
+        portal1.generateTexture()
+        portal2.generateTexture()
+
+        //
+        //Render auf FBO -> Portals
+        //
+        portal1.renderToFramebufferStart(staticShader)
+        cam.bind(staticShader)
+        pointLight.bind(staticShader, "pointLight")
+        spotLight.bind(staticShader,"spotLight", Matrix4f())
+        lightCycle?.render(staticShader)
+        ground.render(staticShader)
+        portal1.render(staticShader)
+        portal2.render(staticShader)
+        portal1.renderToFramebufferStop()
+
+        portal2.renderToFramebufferStart(staticShader)
+        cam.bind(staticShader)
+        pointLight.bind(staticShader, "pointLight")
+        spotLight.bind(staticShader,"spotLight", Matrix4f())
+        lightCycle?.render(staticShader)
+        ground.render(staticShader)
+        portal1.render(staticShader)
+        portal2.render(staticShader)
+        portal2.renderToFramebufferStop()
+
+        //
+        //Rendert auf den Bildschirm kann aus kommentiert werden
+        //
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
         staticShader.use()
         cam.bind(staticShader)
@@ -215,6 +269,9 @@ class Scene(private val window: GameWindow) {
         spotLight.bind(staticShader,"spotLight", Matrix4f())
         lightCycle?.render(staticShader)
         ground.render(staticShader)
+        portal1.render(staticShader)
+        portal2.render(staticShader)
+
 
 
     }
