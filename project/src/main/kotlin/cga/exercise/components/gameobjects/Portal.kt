@@ -80,6 +80,8 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
         //camera.translateGlobal(Vector3f(0f))
     }
 
+    // Set Camera Parents is now reworked and does something different.
+    // It sets the position & rotation of the portal cameras (relative to player and portal position)
     fun setCameraParent(p: Renderable, c: Renderable?) {
         val pWorldPos = p.getWorldPosition()
         val playerWorldPos = c?.getWorldPosition()
@@ -87,22 +89,22 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
             exitProcess(0)
         }
         else {
-            //println(playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
-
             camera.setRotationA(c.getRotationA())
             camera.setPosition(playerWorldPos.x + pWorldPos.x - portalWall.getWorldPosition().x, 2f, playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
             //println(camera.getWorldPosition())
-            //camera.parent = p
 
-            //portalCam.setRotationA(c.getRotationA())
+            //Needed to transition the player from portal a to portal b
+            portalCam.setRotationA(c.getRotationA())
             portalCam.scaleLocal(Vector3f(0.1f))
             portalCam.setPosition(camera.getWorldPosition().x, 1f, camera.getWorldPosition().z)
 
+            //Debugging
             //println(portalCam.getWorldPosition() == camera.getWorldPosition())
             //println(camera.getWorldPosition())
         }
     }
 
+    // Generates portal texture
     fun generateTexture() {
         screenShader.use(); GLError.checkThrow()
         val currentImage = framebuffer.gAlbedo
@@ -120,14 +122,18 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
         framebuffer.stopRender(); GLError.checkThrow()
     }
 
+    fun bindPortalCamera(shaderProgram: ShaderProgram) {
+        camera.bind(shaderProgram)
+    }
+
+    // Renders portals with the portalShader (which will be set when calling this function)
     fun render(shaderProgram: ShaderProgram) {
-        //portalTexture = tex
 
         portalMaterial = Material(portalTexture, portalTexture, portalTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
         portalWall.meshes[0].material = portalMaterial
 
         portalWall.render(shaderProgram)
-        //portalCam.render(shaderProgram)
+        //portalCam.render(shaderProgram) //This is not a camera, but rather a 3d object that shows the position and rotation of the camera. Used for debugging.
     }
 
 }
