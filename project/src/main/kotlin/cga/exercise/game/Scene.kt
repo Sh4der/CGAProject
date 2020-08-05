@@ -180,8 +180,8 @@ class Scene(private val window: GameWindow) {
 
 
         //Portal Setup
-        portal1 = Portal(window, screenShader,-5f, 2.2f, -10f, 90f, 180f, 90f)
-        portal2 = Portal(window, screenShader,5f, 2.2f, 10f, 90f, 0f, 90f)
+        portal1 = Portal(window, screenShader,-12f, 2.2f, -10f, 90f, 180f, 90f)
+        portal2 = Portal(window, screenShader,12f, 2.2f, 10f, 90f, 0f, 90f)
 
     }
 
@@ -252,8 +252,10 @@ class Scene(private val window: GameWindow) {
         spotLight.bind(staticShader,"spotLight", Matrix4f())
         lightCycle?.render(staticShader)
         ground.render(staticShader)
-        //portal1.render(staticShader)
-        portal2.render(staticShader)
+        portalShader.use()
+        portal1.bindPortalCamera(portalShader)
+        portal1.render(portalShader)
+        portal2.render(portalShader)
         portal1.renderToFramebufferStop()
 
         portal2.renderToFramebufferStart(staticShader)
@@ -262,8 +264,10 @@ class Scene(private val window: GameWindow) {
         spotLight.bind(staticShader,"spotLight", Matrix4f())
         lightCycle?.render(staticShader)
         ground.render(staticShader)
-        portal1.render(staticShader)
-        //portal2.render(staticShader)
+        portalShader.use()
+        portal2.bindPortalCamera(portalShader)
+        portal1.render(portalShader)
+        portal2.render(portalShader)
         portal2.renderToFramebufferStop()
 
         //
@@ -280,10 +284,6 @@ class Scene(private val window: GameWindow) {
         cam.bind(portalShader)
         portal1.render(portalShader)
         portal2.render(portalShader)
-
-        //println(lightCycle?.getYDir())
-
-        //println("X: ${cam.getWorldPosition().x}, Z: ${cam.getWorldPosition().z}")
 
     }
 
@@ -338,8 +338,12 @@ class Scene(private val window: GameWindow) {
 
 
         //Check if player goes through portal
-        if (lightCycle?.getWorldPosition()?.x!! > portal2.portalWall.getWorldPosition().x) {
-            lightCycle?.setPosition(portal1.portalCam.getWorldPosition().x + 0.1f, 2f, portal1.portalCam.getWorldPosition().z)
+        //VERY PRIMITIVE AND BAD!!!
+        if (lightCycle?.getWorldPosition()?.x!! > portal2.portalWall.getWorldPosition().x-0.1f) {
+            lightCycle?.setPosition(portal2.portalCam.getWorldPosition().x+0.2f, 0f, portal2.portalCam.getWorldPosition().z)
+        }
+        else if (lightCycle?.getWorldPosition()?.x!! < portal1.portalWall.getWorldPosition().x+0.1f) {
+            lightCycle?.setPosition(portal1.portalCam.getWorldPosition().x-0.2f, 0f, portal1.portalCam.getWorldPosition().z)
         }
     }
 

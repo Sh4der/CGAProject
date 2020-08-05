@@ -112,8 +112,4 @@ open class Transformable : ITransformable {
         model_matrix.rotate(rot)
     }
 
-    fun setRotation(x: Float, y: Float, z: Float) {
-        model_matrix.setRotationXYZ(x,y,z)
-    }
-
 }
