@@ -68,14 +68,14 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
         //Test transformations
         portalWall.rotateLocal(rotx,roty,rotz)
         portalWall.translateGlobal(Vector3f(x,y,z))
-        portalWall.scaleLocal(Vector3f(0.1f,0.1f,0.1f))
+        portalWall.scaleLocal(Vector3f(0.256f,0.144f,0.144f))
 
         //Create Framebuffer
         framebuffer = GeometryFramebuffer(window.framebufferWidth, window.framebufferHeight)
 
         //Define camera
         camera = TronCamera()
-        camera.rotateLocal(0f,roty,0f)
+        //camera.rotateLocal(0f,-90f,0f)
         camera.translateLocal(Vector3f(0f,2f,0f))
         //camera.translateGlobal(Vector3f(0f))
     }
@@ -88,20 +88,18 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
         }
         else {
             //println(playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
+
             camera.setRotationA(c.getRotationA())
             camera.setPosition(playerWorldPos.x + pWorldPos.x - portalWall.getWorldPosition().x, 2f, playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
-            //camera.rotateLocal(rotx,0f,0f)
             //println(camera.getWorldPosition())
             //camera.parent = p
-            //portalCam.setPosition(playerWorldPos.x + pWorldPos.x - portalWall.getWorldPosition().x, 0.1f, playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
-            //portalCam.setRotation(0f,0f,0f)
-            //portalCam.rotateLocal(0f,c.getYDir().toFloat(),0f)
-            portalCam.setRotationA(c.getRotationA())
+
+            //portalCam.setRotationA(c.getRotationA())
             portalCam.scaleLocal(Vector3f(0.1f))
             portalCam.setPosition(camera.getWorldPosition().x, 1f, camera.getWorldPosition().z)
+
             //println(portalCam.getWorldPosition() == camera.getWorldPosition())
             //println(camera.getWorldPosition())
-            //portalCam.scaleLocal(Vector3f(0.1f))
         }
     }
 
@@ -114,12 +112,12 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
     }
 
     fun renderToFramebufferStart(shaderProgram: ShaderProgram) {
-        framebuffer.startRender(shaderProgram)
+        framebuffer.startRender(shaderProgram); GLError.checkThrow()
         camera.bind(shaderProgram)
     }
 
     fun renderToFramebufferStop() {
-        framebuffer.stopRender()
+        framebuffer.stopRender(); GLError.checkThrow()
     }
 
     fun render(shaderProgram: ShaderProgram) {
@@ -127,9 +125,9 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
 
         portalMaterial = Material(portalTexture, portalTexture, portalTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
         portalWall.meshes[0].material = portalMaterial
-        portalWall.render(shaderProgram)
 
-        portalCam.render(shaderProgram)
+        portalWall.render(shaderProgram)
+        //portalCam.render(shaderProgram)
     }
 
 }

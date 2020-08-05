@@ -43,6 +43,7 @@ class Scene(private val window: GameWindow) {
     private val ssaoColorShader : ShaderProgram
     private val blurShader : ShaderProgram
     private val lightningShader : ShaderProgram
+    private val portalShader : ShaderProgram
 
     private val cam : TronCamera
 
@@ -88,6 +89,7 @@ class Scene(private val window: GameWindow) {
         blurShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoBlur_frag.glsl")
         lightningShader = ShaderProgram("assets/shaders/ssaoColor_vert.glsl", "assets/shaders/ssaoLightning_frag.glsl")
         screenShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/screen_frag.glsl")
+        portalShader = ShaderProgram("assets/shaders/portal_vert.glsl", "assets/shaders/portal_frag.glsl")
 
         //Create the mesh
         val stride: Int = 8 * 4
@@ -178,8 +180,8 @@ class Scene(private val window: GameWindow) {
 
 
         //Portal Setup
-        portal1 = Portal(window, screenShader,-5f, 2.2f, 0f, 90f, 180f, 90f)
-        portal2 = Portal(window, screenShader,5f, 2.2f, 0f, 90f, 0f, 90f)
+        portal1 = Portal(window, screenShader,-5f, 2.2f, -10f, 90f, 180f, 90f)
+        portal2 = Portal(window, screenShader,5f, 2.2f, 10f, 90f, 0f, 90f)
 
     }
 
@@ -187,7 +189,7 @@ class Scene(private val window: GameWindow) {
 
         //------------------------Lukas---------------------//
 
-        gBufferObject.startRender(gBufferShader)
+        /*gBufferObject.startRender(gBufferShader)
         cam.bind(gBufferShader); GLError.checkThrow()
         ground.render(gBufferShader); GLError.checkThrow()
         lightCycle?.render(gBufferShader); GLError.checkThrow()
@@ -200,7 +202,7 @@ class Scene(private val window: GameWindow) {
 
         blurFramebuffer.startRender(blurShader, ssaoTextureFramebuffer)
         screenQuadMesh.render()
-        blurFramebuffer.stopRender()
+        blurFramebuffer.stopRender()*/
 
         //
         //Rendert auf den Bildschirm kann aus kommentiert werden
@@ -250,7 +252,7 @@ class Scene(private val window: GameWindow) {
         spotLight.bind(staticShader,"spotLight", Matrix4f())
         lightCycle?.render(staticShader)
         ground.render(staticShader)
-        portal1.render(staticShader)
+        //portal1.render(staticShader)
         portal2.render(staticShader)
         portal1.renderToFramebufferStop()
 
@@ -261,7 +263,7 @@ class Scene(private val window: GameWindow) {
         lightCycle?.render(staticShader)
         ground.render(staticShader)
         portal1.render(staticShader)
-        portal2.render(staticShader)
+        //portal2.render(staticShader)
         portal2.renderToFramebufferStop()
 
         //
@@ -274,10 +276,12 @@ class Scene(private val window: GameWindow) {
         spotLight.bind(staticShader,"spotLight", Matrix4f())
         lightCycle?.render(staticShader)
         ground.render(staticShader)
-        portal1.render(staticShader)
-        portal2.render(staticShader)
+        portalShader.use()
+        cam.bind(portalShader)
+        portal1.render(portalShader)
+        portal2.render(portalShader)
 
-        println(lightCycle?.getYDir())
+        //println(lightCycle?.getYDir())
 
         //println("X: ${cam.getWorldPosition().x}, Z: ${cam.getWorldPosition().z}")
 
@@ -329,6 +333,13 @@ class Scene(private val window: GameWindow) {
             currentImage = ssaoTextureFramebuffer.ssaoColorTexture
         }else if(window.getKeyState(GLFW.GLFW_KEY_6)) {
             currentImage = blurFramebuffer.blurFRamebufferTexture
+        }
+
+
+
+        //Check if player goes through portal
+        if (lightCycle?.getWorldPosition()?.x!! > portal2.portalWall.getWorldPosition().x) {
+            lightCycle?.setPosition(portal1.portalCam.getWorldPosition().x + 0.1f, 2f, portal1.portalCam.getWorldPosition().z)
         }
     }
 
