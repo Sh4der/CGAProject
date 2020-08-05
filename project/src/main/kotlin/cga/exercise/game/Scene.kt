@@ -97,20 +97,21 @@ class Scene(private val window: GameWindow) {
         val vertexAttributes = arrayOf<VertexAttribute>(attrPos, attrTC, attrNorm)
 
 
-        lightCycle = ModelLoader.loadModel("assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj", Math.toRadians(-90f), Math.toRadians(90f), 0f)
+        //lightCycle = ModelLoader.loadModel("assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj", Math.toRadians(-90f), Math.toRadians(90f), 0f)
+        lightCycle = ModelLoader.loadModel("assets/chell/0.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
         if(lightCycle == null)
         {
             exitProcess(1)
         }
         lightCycle?.meshes?.get(2)?.material?.emitColor = Vector3f(1f, 0f, 0f)
-        lightCycle?.scaleLocal(Vector3f(0.8f))
+        lightCycle?.scaleLocal(Vector3f(1f))
 
 
-        val diffTex = Texture2D("assets/textures/ground_diff.png", true)
+        val diffTex = Texture2D("assets/textures/con_wall_1.png", true)
         diffTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST)
-        val emitTex = Texture2D("assets/textures/ground_emit.png", true)
+        val emitTex = Texture2D("assets/textures/con_wall_1.png", true)
         emitTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
-        val specTex = Texture2D("assets/textures/ground_spec.png", true)
+        val specTex = Texture2D("assets/textures/con_wall_1.png", true)
         specTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
         println(emitTex.texID)
         val groundMaterial = Material(diffTex,
@@ -127,16 +128,16 @@ class Scene(private val window: GameWindow) {
         val meshGround = Mesh(groundMesh.vertexData, groundMesh.indexData, vertexAttributes, groundMaterial)
 
         ground = Renderable(mutableListOf(meshGround))
-        ground.meshes[0].material?.emitColor = Vector3f(0f, 1f, 0f)
+        ground.meshes[0].material?.emitColor = Vector3f(1f, 1f, 1f)
 
 
         cam = TronCamera()
-        cam.rotateLocal(-35f, 0f, 0f)
-        cam.translateLocal(Vector3f(0f,  0f, 6f))
+        cam.rotateLocal(0f, 0f, 0f)
+        cam.translateLocal(Vector3f(0f,  2f, 0f))
 
         cam.parent = lightCycle!!
 
-        pointLight = PointLight(Vector3f(0f, 1f, 0f), Vector3i(255, 0, 255))
+        pointLight = PointLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255))
         pointLight.parent = lightCycle
 
         spotLight = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
@@ -233,8 +234,8 @@ class Scene(private val window: GameWindow) {
 
         //------------------------Nico---------------------//
         //Set the cameras for the two portals
-        portal1.setCameraParent(portal2.portalWall)
-        portal2.setCameraParent(portal1.portalWall)
+        portal1.setCameraParent(portal2.portalWall, lightCycle)
+        portal2.setCameraParent(portal1.portalWall, lightCycle)
 
         //Render Texture from portal cameras
         portal1.generateTexture()
@@ -276,36 +277,45 @@ class Scene(private val window: GameWindow) {
         portal1.render(staticShader)
         portal2.render(staticShader)
 
+        println(lightCycle?.getYDir())
+
+        //println("X: ${cam.getWorldPosition().x}, Z: ${cam.getWorldPosition().z}")
 
     }
 
 
     fun update(dt: Float, t: Float) {
-        var speed = 0f
-        var rotationDirection = 0f
-        val turningCycleRadius = 3f
+        //var speed = 0f
+        var vspeed = 0f
+        var hspeed = 0f
+        //var rotationDirection = 0f
+        //val turningCycleRadius = 3f
 
         if(window.getKeyState(GLFW.GLFW_KEY_W)) {
-            speed = -5f
+            vspeed = -5f
         }
         else if(window.getKeyState(GLFW.GLFW_KEY_S)) {
-            speed = 5f
+            vspeed = 5f
         }
         if(window.getKeyState(GLFW.GLFW_KEY_A)) {
-            rotationDirection = -1f
+            //rotationDirection = -1f
+            hspeed = -5f
         }
         else if(window.getKeyState(GLFW.GLFW_KEY_D)) {
-            rotationDirection = 1f
+            //rotationDirection = 1f
+            hspeed = 5f
         }
 
-        if(rotationDirection == 0f){
+        lightCycle?.translateLocal(Vector3f(hspeed * dt, 0f, vspeed * dt))
+
+        /*if(rotationDirection == 0f){
             lightCycle?.translateLocal(Vector3f(0f, 0f, speed * dt))
         }
         else if(speed != 0f)
         {
             lightCycle?.rotateAroundPoint(0f,  (360 * speed)/(2f*Math.PI.toFloat() * turningCycleRadius) * rotationDirection * dt, 0f, lightCycle!!.getWorldPosition().add(lightCycle!!.getXAxis().mul(turningCycleRadius*rotationDirection)))
-        }
-        lightCycle?.meshes?.get(2)?.material?.emitColor = Vector3f((Math.sin(t) + 1f)/2, (Math.sin(t*2) + 1f)/2, (Math.sin(t*3) + 1f)/2)
+        }*/
+        //lightCycle?.meshes?.get(2)?.material?.emitColor = Vector3f((Math.sin(t) + 1f)/2, (Math.sin(t*2) + 1f)/2, (Math.sin(t*3) + 1f)/2)
 
         if(window.getKeyState(GLFW.GLFW_KEY_1)) {
             currentImage = gBufferObject.gPosition
@@ -330,7 +340,8 @@ class Scene(private val window: GameWindow) {
     fun onMouseMove(xpos: Double, ypos: Double) {
 
         //cam.rotateAroundPoint((oldMousePosY-ypos).toFloat() * 0.002f, (oldMousePosX - xpos).toFloat() * 0.002f, 0f, Vector3f(0f))
-        cam.rotateAroundPoint(0f, (oldMousePosX - xpos).toFloat() * 0.02f, 0f, Vector3f(0f))
+        //cam.rotateAroundPoint(0f, (oldMousePosX - xpos).toFloat() * 0.02f, 0f, Vector3f(0f))
+        lightCycle?.rotateLocal(0f, (oldMousePosX - xpos).toFloat() * 0.02f, 0f)
 
         oldMousePosX = xpos
         oldMousePosY = ypos

@@ -14,6 +14,7 @@ import cga.framework.OBJLoader
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11
+import kotlin.system.exitProcess
 
 class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Float = 0.0f, var y: Float = 0.0f, var z: Float = 0.0f, var rotx: Float = 90f, var roty: Float = 180f, var rotz: Float = 90f) {
     /*
@@ -28,8 +29,11 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
 
     private var framebuffer : GeometryFramebuffer
     private var portalTexture : Texture2D
+    private var portalCamTexture : Texture2D
     private var portalMaterial : Material
+    private var portalMaterialCam : Material
     val portalWall : Renderable
+    val portalCam : Renderable
     private val camera : TronCamera
 
 
@@ -43,17 +47,23 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
 
         //Use Ground Textures as default textures, 'cause I'm too lazy to create default portal textures
         portalTexture = Texture2D("assets/textures/ground_diff.png", true)
+        portalCamTexture = Texture2D("assets/textures/ground_diff.png", true)
         portalTexture.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_NEAREST, GL11.GL_NEAREST)
         portalMaterial = Material(portalTexture, portalTexture, portalTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
+        portalMaterialCam = Material(portalCamTexture, portalCamTexture, portalCamTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
 
         //load an object and create a mesh
         val resPortalWall : OBJLoader.OBJResult = OBJLoader.loadOBJ("assets/models/ground.obj")
         //Get the first mesh of the first object
         val portalWallMesh: OBJLoader.OBJMesh = resPortalWall.objects[0].meshes[0]
         val meshPortalWall = Mesh(portalWallMesh.vertexData, portalWallMesh.indexData, vertexAttributes, portalMaterial)
+        val meshPortalWallCam = Mesh(portalWallMesh.vertexData, portalWallMesh.indexData, vertexAttributes, portalMaterialCam)
 
         portalWall = Renderable(mutableListOf(meshPortalWall))
-        portalWall.meshes[0].material?.emitColor = Vector3f(0f, 1f, 0f)
+
+        portalCam = Renderable(mutableListOf(meshPortalWallCam)) //For visualizing the camera for each portal
+        portalCam.meshes[0].material?.emitColor = Vector3f(0f, 1f, 0f)
+        portalCam.scaleLocal(Vector3f(0.1f))
 
         //Test transformations
         portalWall.rotateLocal(rotx,roty,rotz)
@@ -65,12 +75,34 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
 
         //Define camera
         camera = TronCamera()
-        camera.rotateLocal(rotx,0f,0f)
-        camera.translateGlobal(Vector3f(0f))
+        camera.rotateLocal(0f,roty,0f)
+        camera.translateLocal(Vector3f(0f,2f,0f))
+        //camera.translateGlobal(Vector3f(0f))
     }
 
-    fun setCameraParent(p: Renderable) {
-        camera.parent = p
+    fun setCameraParent(p: Renderable, c: Renderable?) {
+        val pWorldPos = p.getWorldPosition()
+        val playerWorldPos = c?.getWorldPosition()
+        if (playerWorldPos == null) {
+            exitProcess(0)
+        }
+        else {
+            //println(playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
+            camera.setRotationA(c.getRotationA())
+            camera.setPosition(playerWorldPos.x + pWorldPos.x - portalWall.getWorldPosition().x, 2f, playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
+            //camera.rotateLocal(rotx,0f,0f)
+            //println(camera.getWorldPosition())
+            //camera.parent = p
+            //portalCam.setPosition(playerWorldPos.x + pWorldPos.x - portalWall.getWorldPosition().x, 0.1f, playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
+            //portalCam.setRotation(0f,0f,0f)
+            //portalCam.rotateLocal(0f,c.getYDir().toFloat(),0f)
+            portalCam.setRotationA(c.getRotationA())
+            portalCam.scaleLocal(Vector3f(0.1f))
+            portalCam.setPosition(camera.getWorldPosition().x, 1f, camera.getWorldPosition().z)
+            //println(portalCam.getWorldPosition() == camera.getWorldPosition())
+            //println(camera.getWorldPosition())
+            //portalCam.scaleLocal(Vector3f(0.1f))
+        }
     }
 
     fun generateTexture() {
@@ -96,6 +128,8 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, var x: Flo
         portalMaterial = Material(portalTexture, portalTexture, portalTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
         portalWall.meshes[0].material = portalMaterial
         portalWall.render(shaderProgram)
+
+        portalCam.render(shaderProgram)
     }
 
 }

@@ -56,7 +56,7 @@ void main(){
 
 
     //Spotlight
-    float distanceToSpot = length(toSpotLight);
+    /*float distanceToSpot = length(toSpotLight);
     float spotAttenuation = 1.0f / (spotLightConstantAttenuation + spotLightLinearAttenuation * distanceToLight + spotLightQuadraticAttenuation * (distanceToLight*distanceToLight));
 
     float theta = dot(normalizedToSpotLight, normalize(-normalizedSpotLightDirection));
@@ -68,12 +68,12 @@ void main(){
     vec3 reflectedToSpotLight = reflect(-normalizedToSpotLight, normalizedNormal);
     float brightnessSpotSpecular = max(0.0f, dot(reflectedToSpotLight, normalizedToCamera));
 
-    vec3 finalSpotSpec = spotAttenuation * pow(brightnessSpotSpecular, shininess) * texture(specTex, vertexData.textureCoord).rgb * spotLightColor;
+    vec3 finalSpotSpec = spotAttenuation * pow(brightnessSpotSpecular, shininess) * texture(specTex, vertexData.textureCoord).rgb * spotLightColor;*/
 
 
     //Output
     vec3 ambient = 0.1f * pointLightColor * pointAttenuation;
-    vec3 result = emitColor * texture(emitTex, vertexData.textureCoord).rgb + (ambient * finalDiff + finalSpec + finalSpotDiff);
+    vec3 result = emitColor * texture(emitTex, vertexData.textureCoord).rgb + (ambient * finalDiff + finalSpec/* + finalSpotDiff*/);
 
     //vec3 result = finalDiff * texture(emitTex, vertexData.textureCoord).rgb + finalSpec;
     //vec3 result = (ambient + finalDiff + finalSpec) + texture(emitTex, vertexData.textureCoord).rgb;
