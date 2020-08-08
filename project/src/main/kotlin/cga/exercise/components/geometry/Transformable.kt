@@ -99,6 +99,8 @@ open class Transformable : ITransformable {
 
     fun getYDir() = atan2(model_matrix.m00().toDouble(), model_matrix.m02().toDouble())
 
+    fun getYDirDeg() = (if (getYDir() > 0) getYDir() else 2 * Math.PI + getYDir()) * 360 / (2 * Math.PI)
+
 
     fun getRotationA() : AxisAngle4f {
         val ret = AxisAngle4f()
@@ -112,4 +114,12 @@ open class Transformable : ITransformable {
         model_matrix.rotate(rot)
     }
 
+    fun setRotation(x: Float,y: Float,z: Float) {
+        model_matrix = Matrix4f()
+        model_matrix.rotateXYZ(x, y, z)
+    }
+
+    fun setModelMatrix(m: Matrix4f) {
+        model_matrix = m
+    }
 }

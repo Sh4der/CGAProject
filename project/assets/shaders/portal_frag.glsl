@@ -6,6 +6,8 @@ uniform sampler2D diffTex;
 uniform sampler2D specTex;
 uniform float shininess;
 
+uniform vec3 frameColor;
+
 //input from vertex shader
 in struct VertexData
 {
@@ -30,6 +32,11 @@ void main() {
     //color = vec4(screenSpace, 0, 1);
     //color = vec4(vertexData.textureCoord, 0, 1.0);
     //color = vec4(normalTex.xyz, 1.0);
-    color = vec4(tex.xyz, 1.0);
+    if (frameColor == vec3(1,1,1)) {
+        color = vec4(tex.xyz * frameColor, 1);
+    }
+    else {
+        color = vec4(frameColor, 1);
+    }
 
 }
