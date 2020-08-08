@@ -207,7 +207,7 @@ class Scene(private val window: GameWindow) {
 
         //------------------------Lukas---------------------//
 
-        gBufferObject.startRender(gBufferShader)
+        /*gBufferObject.startRender(gBufferShader)
         cam.bind(gBufferShader); GLError.checkThrow()
         ground.render(gBufferShader); GLError.checkThrow()
         lightCycle?.render(gBufferShader); GLError.checkThrow()
@@ -252,7 +252,7 @@ class Scene(private val window: GameWindow) {
         lightningShader.setUniform("gAlbedo", 2)
         blurFramebuffer.blurFramebufferTexture.bind(3)
         lightningShader.setUniform("ssao", 3)
-        screenQuadMesh.render(); GLError.checkThrow()
+        screenQuadMesh.render(); GLError.checkThrow()*/
 
         //println("${buf.get(0)} : ${buf.get(1)} : ${buf.get(2)} : ${buf.get(3)}")
 
@@ -384,7 +384,7 @@ class Scene(private val window: GameWindow) {
         }else if(window.getKeyState(GLFW.GLFW_KEY_5)) {
             currentImage = ssaoTextureFramebuffer.ssaoColorTexture
         }else if(window.getKeyState(GLFW.GLFW_KEY_6)) {
-            currentImage = blurFramebuffer.blurFRamebufferTexture
+            currentImage = blurFramebuffer.blurFramebufferTexture
         }
 
 
