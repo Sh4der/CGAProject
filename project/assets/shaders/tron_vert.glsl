@@ -24,6 +24,7 @@ out struct VertexData
     vec3 position;
     vec2 textureCoord;
     vec3 normal;
+    vec4 testPos;
 } vertexData;
 
 
@@ -41,6 +42,8 @@ void main(){
     mat4 inverseTransposeViewMatrix = inverse(transpose(view_matrix));
 
     gl_Position = projection_matrix * positionInCameraSpace;
+
+    vertexData.testPos = projection_matrix * positionInCameraSpace;
 
     vertexData.position = worldPosition.xyz;
     vertexData.textureCoord = tcMultiplier * textureCoord;

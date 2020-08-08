@@ -1,8 +1,11 @@
 package cga.exercise.components.geometry
 
+import org.joml.AxisAngle4f
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.joml.Math
+import java.lang.Math.atan2
+import java.lang.Math.toDegrees
 
 
 open class Transformable : ITransformable {
@@ -85,4 +88,38 @@ open class Transformable : ITransformable {
 
     override fun getLocalModelMatrix(): Matrix4f = model_matrix
 
+
+
+    // created by Nico
+
+    fun setPosition(x: Float, y: Float, z: Float) {
+        //model_matrix = Matrix4f().translate(Vector3f(x,y,z))
+        model_matrix.setTranslation(x,y,z)
+    }
+
+    fun getYDir() = atan2(model_matrix.m00().toDouble(), model_matrix.m02().toDouble())
+
+    fun getYDirDeg() = (if (getYDir() > 0) getYDir() else 2 * Math.PI + getYDir()) * 360 / (2 * Math.PI)
+
+
+    fun getRotationA() : AxisAngle4f {
+        val ret = AxisAngle4f()
+        model_matrix.getRotation(ret)
+        return ret
+    }
+
+    fun setRotationA(rot: AxisAngle4f) {
+        //model_matrix.setRotationXYZ(0f,0f,0f)
+        model_matrix = Matrix4f()
+        model_matrix.rotate(rot)
+    }
+
+    fun setRotation(x: Float,y: Float,z: Float) {
+        model_matrix = Matrix4f()
+        model_matrix.rotateXYZ(x, y, z)
+    }
+
+    fun setModelMatrix(m: Matrix4f) {
+        model_matrix = m
+    }
 }
