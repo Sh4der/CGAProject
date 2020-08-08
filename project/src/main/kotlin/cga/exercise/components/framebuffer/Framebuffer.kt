@@ -125,7 +125,7 @@ abstract class Framebuffer(val width : Int, val height : Int) {
      */
     protected fun createTextureAttachment(attachment : Int, genMipMap : Boolean, internalformat : Int, format : Int, type : Int) : Texture2D
     {
-        val tex = Texture2D(null as ByteBuffer?, width, height, genMipMap); GLError.checkThrow()
+        val tex = Texture2D(null as ByteBuffer?, width, height, genMipMap, internalformat, format, type); GLError.checkThrow()
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex.texID); GLError.checkThrow()
         GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0 + attachment, GL11.GL_TEXTURE_2D, tex.texID, 0); GLError.checkThrow()
         allAttachments.add(GL30.GL_COLOR_ATTACHMENT0 + attachment); GLError.checkThrow()
@@ -139,7 +139,7 @@ abstract class Framebuffer(val width : Int, val height : Int) {
     protected fun createDepthTexture() : Texture2D
     {
         val depthTex = Texture2D(null as ByteBuffer?, width, height, true, GL14.GL_DEPTH_COMPONENT24, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT)
-        depthTex.setTexParams(GL12.GL_CLAMP_TO_EDGE, GL12.GL_CLAMP_TO_EDGE, GL11.GL_LINEAR, GL11.GL_LINEAR)
+        depthTex.setTexParams(GL12.GL_CLAMP_TO_EDGE, GL12.GL_CLAMP_TO_EDGE, GL11.GL_NEAREST, GL11.GL_NEAREST)
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, depthTex.texID)
         GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, GL11.GL_TEXTURE_2D, depthTex.texID, 0)
         return depthTex

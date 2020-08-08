@@ -5,6 +5,7 @@ import cga.exercise.components.texture.Texture2D
 import cga.framework.GLError
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL12
+import org.lwjgl.opengl.GL42
 
 
 /**
@@ -32,11 +33,11 @@ class GeometryFramebuffer(_width : Int, _height : Int) : Framebuffer(_width, _he
      *
      */
     override fun configureFramebuffer() {
-        gPosition = createTextureAttachment(0, false)
+        gPosition = createTextureAttachment(0, false, GL42.GL_RGBA16F, GL11.GL_RGBA, GL11.GL_FLOAT)
         gPosition.setTexParams(GL12.GL_CLAMP_TO_EDGE, GL12.GL_CLAMP_TO_EDGE, GL12.GL_NEAREST, GL12.GL_NEAREST)
-        gNormal = createTextureAttachment(1, false)
+        gNormal = createTextureAttachment(1, false, GL42.GL_RGBA16F, GL11.GL_RGBA, GL11.GL_FLOAT)
         gNormal.setTexParams(GL12.GL_NEAREST, GL12.GL_NEAREST)
-        gAlbedo = createTextureAttachment(2, false)
+        gAlbedo = createTextureAttachment(2, false, GL11.GL_RGBA, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE)
         gAlbedo.setTexParams(GL12.GL_NEAREST, GL12.GL_NEAREST)
 
         depthRenderbuffer = createDepthBuffer()

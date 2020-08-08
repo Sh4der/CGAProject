@@ -14,6 +14,7 @@ out struct VertexData
 uniform mat4 model_matrix;
 uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
+
 uniform vec2 tcMultiplier;
 
 void main()
