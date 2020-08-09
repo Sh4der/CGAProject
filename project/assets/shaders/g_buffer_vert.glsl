@@ -21,7 +21,7 @@ void main()
 {
     vec4 viewPos = view_matrix * model_matrix * vec4(position, 1.0f);
     vertexdata.fragPos = viewPos.xyz;
-    vertexdata.texCoords = textureCoord;
+    vertexdata.texCoords = textureCoord * tcMultiplier;
 
     mat3 normalMatrix = transpose(inverse(mat3(view_matrix * model_matrix)));
     vertexdata.normal = normalMatrix * normal;

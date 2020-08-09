@@ -228,10 +228,10 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     // Generates portal texture
     fun generateTexture() {
         screenShader.use(); GLError.checkThrow()
-        val currentImage = framebuffer.gAlbedo
+        val currentImage = framebuffer.gDiffTex
         currentImage.bind(0)
         screenShader.setUniform("tex", 0)
-        portalTexture = framebuffer.gAlbedo
+        portalTexture = framebuffer.gDiffTex
     }
 
     // Starts rendering to Framebuffer

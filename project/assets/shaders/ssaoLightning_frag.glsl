@@ -1,11 +1,19 @@
 #version 330 core
+const int maxPointlights = 64;
+const int maxSpotlights = 64;
+
 out vec4 FragColor;
 
 in vec2 ioTexCoords;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
-uniform sampler2D gAlbedo;
+uniform sampler2D gDiff;
+uniform sampler2D gEmit;
+uniform sampler2D gSpec;
+uniform sampler2D gShininess;
+
+
 uniform sampler2D ssao;
 
 uniform vec3 lightPosition;
@@ -20,54 +28,107 @@ struct Pointlight {
     float LinearAttenuation;
     float QuadraticAttenuation;
 };
-uniform Pointlight pointlight;
+uniform int numPointlights;
+uniform Pointlight pointlight[maxPointlights];
 
 struct Spotlight {
     vec3 Position;
     vec3 Color;
+    vec3 Direction;
+    float InnerCone;
+    float OuterCone;
 
     float ConstantAttenuation;
     float LinearAttenuation;
     float QuadraticAttenuation;
 };
-uniform Spotlight spotlight;
+uniform int numSpotlights;
+uniform Spotlight spotlight[maxSpotlights];
 
+vec3 calcPointlight(Pointlight curPointlight, vec3 FragPos, vec3 Normal, vec3 Diffuse, vec3 Spec, float Shininess, float AmbientOcclusion) {
+    vec3 viewDir  = normalize(-FragPos); // viewpos is (0.0.0)
+
+    // diffuse pointlight
+    vec3 lightPositionInViewspace = (view_matrix * vec4(curPointlight.Position, 1.0f)).xyz;
+    vec3 toLight = normalize(lightPositionInViewspace - FragPos);
+    vec3 diffuse = max(dot(Normal, toLight), 0.0f) * Diffuse * curPointlight.Color;
+
+    // specular pointlight
+    vec3 reflectedToLight = reflect(-normalize(toLight), Normal);
+    float brightnessSpecular = max(0.0f, dot(reflectedToLight, viewDir));
+
+    vec3 specular = pow(brightnessSpecular, Shininess) * curPointlight.Color * Spec;
+
+
+    // attenuation pointlight
+    float distance = length(lightPositionInViewspace - FragPos);
+    float attenuation = 1.0 / (1.0 + curPointlight.LinearAttenuation * distance + curPointlight.QuadraticAttenuation * distance * distance);
+    diffuse *= attenuation;
+    specular *= attenuation;
+    vec3 ambient = 0.1 * curPointlight.Color * attenuation * Diffuse * AmbientOcclusion;
+
+    return diffuse + specular + ambient;
+}
+
+vec3 calcSpotlight(Spotlight curSpotlight, vec3 FragPos, vec3 Normal, vec3 Diffuse, vec3 Spec, float Shininess, float AmbientOcclusion)
+{
+    vec3 viewDir  = normalize(-FragPos); // viewpos is (0.0.0)
+    vec3 spotDir = normalize((view_matrix * vec4(curSpotlight.Direction, 0.0f))).xyz;
+
+    vec3 spotlightPositionInViewspace = (view_matrix * vec4(curSpotlight.Position, 1.0f)).xyz;
+
+    vec3 toSpotlight = spotlightPositionInViewspace - FragPos;
+
+
+    float theta = dot(normalize(toSpotlight), normalize(-spotDir));
+    float epsilon = curSpotlight.InnerCone - curSpotlight.OuterCone;
+    float intensity = clamp((theta - curSpotlight.OuterCone) / epsilon, 0.0f, 1.0f);
+    float brightnessSpotDiff = max(dot(Normal, normalize(toSpotlight)), 0.0f);
+    vec3 diffuse = brightnessSpotDiff * curSpotlight.Color * intensity * Diffuse;
+
+    vec3 reflectedToSpotLight = reflect(-normalize(toSpotlight), Normal);
+    float brightnessSpotSpecular = max(0.0f, dot(reflectedToSpotLight, viewDir));
+
+    vec3 specular = pow(brightnessSpotSpecular, Shininess) * curSpotlight.Color * Spec * intensity;
+
+    float distance = length(toSpotlight);
+    float attenuation = 1.0f / (curSpotlight.ConstantAttenuation + curSpotlight.LinearAttenuation * distance + curSpotlight.QuadraticAttenuation * (distance * distance));
+    diffuse *= attenuation;
+    specular *= attenuation;
+
+
+    vec3 ambient = 0.1 * curSpotlight.Color * attenuation * Diffuse * AmbientOcclusion;
+
+
+
+    return diffuse + ambient + specular;
+}
 
 void main()
 {
     vec3 FragPos = texture(gPosition, ioTexCoords).rgb;
     vec3 Normal = texture(gNormal, ioTexCoords).rgb;
-    vec3 Diffuse = texture(gAlbedo, ioTexCoords).rgb;
+    vec3 Diffuse = texture(gDiff, ioTexCoords).rgb;
+    vec3 Emit = texture(gEmit, ioTexCoords).rgb;
+    vec3 Spec = texture(gSpec, ioTexCoords).rgb;
+    float Shininess = texture(gShininess, ioTexCoords).x;
+
     float AmbientOcclusion = texture(ssao, ioTexCoords).r;
 
-    vec3 ambient = vec3(0.3 * Diffuse) * AmbientOcclusion;
 
-    vec3 lighting  = ambient;
-    vec3 viewDir  = normalize(-FragPos); // viewpos is (0.0.0)
+    vec3 lighting  = vec3(0f);
+    lighting += Emit * vec3(0f, 1f, 0f);
 
-    // diffuse
-    vec3 lightDir = normalize((view_matrix * vec4(pointlight.Position, 1.0f)).xyz - FragPos);
-    vec3 diffuse = max(dot(Normal, lightDir), 0.0f) * Diffuse * pointlight.Color;
-
-    // specular
-    vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(Normal, halfwayDir), 0.0), 8.0);
-    vec3 specular = pointlight.Color * spec;
-
-    // attenuation
-    float distance = length(pointlight.Position - FragPos);
-    float attenuation = 1.0 / (1.0 + pointlight.LinearAttenuation * distance + pointlight.QuadraticAttenuation * distance * distance);
-    diffuse *= attenuation;
-    specular *= attenuation;
-    lighting += diffuse + specular;
+    for(int i = 0; i < numPointlights; i++)
+    {
+        lighting += calcPointlight(pointlight[i], FragPos, Normal, Diffuse, Spec, Shininess, AmbientOcclusion);
+    }
+    for(int i = 0; i < numSpotlights; i++)
+    {
+        lighting += calcSpotlight(spotlight[i], FragPos, Normal, Diffuse, Spec, Shininess, AmbientOcclusion);
+    }
 
 
-    vec3 viewToLight = (inverse(transpose(view_matrix)) * vec4(pointlight.Position, 1.0f)).xyz;
-    vec3 toLight = normalize(viewToLight - FragPos);
-    vec3 result = max(dot(Normal, toLight), 0.0) * vec3(0.95f) * pointlight.Color * attenuation;
-
-    FragColor = vec4(vec3(AmbientOcclusion), 1.0f);
-    //FragColor = vec4(lighting, 1.0f);
-    //FragColor = vec4(0.1, 0.2, 0.3, 1.0f);
-
+    //FragColor = vec4(vec3(AmbientOcclusion), 1.0f);
+    FragColor = vec4(lighting, 1.0f);
 }

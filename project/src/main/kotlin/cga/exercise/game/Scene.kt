@@ -9,6 +9,7 @@ import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
 import cga.exercise.components.geometry.Renderable
 import cga.exercise.components.geometry.VertexAttribute
+import cga.exercise.components.light.Lightpool
 import cga.exercise.components.light.PointLight
 import cga.exercise.components.light.SpotLight
 import cga.exercise.components.shader.ShaderProgram
@@ -20,9 +21,9 @@ import cga.framework.OBJLoader
 import cga.framework.OBJLoader.OBJMesh
 import cga.framework.OBJLoader.OBJResult
 import org.joml.*
-import org.lwjgl.BufferUtils
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL11.*
+import kotlin.random.Random
 import kotlin.system.exitProcess
 
 
@@ -69,6 +70,7 @@ class Scene(private val window: GameWindow) {
 
     private val rob : Renderable?
 
+    private val lightpool  = Lightpool()
 
     //scene setup
     init {
@@ -111,11 +113,11 @@ class Scene(private val window: GameWindow) {
         lightCycle?.scaleLocal(Vector3f(1f))
 
 
-        val diffTex = Texture2D("assets/textures/con_wall_1.png", true)
+        val diffTex = Texture2D("assets/textures/ground_emit.png", true)
         diffTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST)
-        val emitTex = Texture2D("assets/textures/con_wall_1.png", true)
+        val emitTex = Texture2D("assets/textures/ground_emit.png", true)
         emitTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
-        val specTex = Texture2D("assets/textures/con_wall_1.png", true)
+        val specTex = Texture2D("assets/textures/ground_spec.png", true)
         specTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
         val groundMaterial = Material(diffTex,
@@ -152,10 +154,19 @@ class Scene(private val window: GameWindow) {
 
         pointLight = PointLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255))
         pointLight.parent = lightCycle
+        lightpool.add(pointLight)
+
+        for (i in 0..20)
+        {
+            val light = PointLight(Vector3f((Random.nextFloat() * 2.0f - 1.0f) * 20f, 1f, (Random.nextFloat() * 2.0f - 1.0f) * 20f), Vector3i(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255)))
+            lightpool.add(light)
+        }
+
 
         spotLight = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
 
         spotLight.parent = lightCycle
+        lightpool.add(spotLight)
 
 
         val quadArray = floatArrayOf(
@@ -207,7 +218,7 @@ class Scene(private val window: GameWindow) {
 
         //------------------------Lukas---------------------//
 
-        /*gBufferObject.startRender(gBufferShader)
+        gBufferObject.startRender(gBufferShader)
         cam.bind(gBufferShader); GLError.checkThrow()
         ground.render(gBufferShader); GLError.checkThrow()
         lightCycle?.render(gBufferShader); GLError.checkThrow()
@@ -242,31 +253,25 @@ class Scene(private val window: GameWindow) {
 
         lightningShader.use(); GLError.checkThrow()
         cam.bind(lightningShader)
-        pointLight.bind(lightningShader, "pointlight.")
-        lightningShader.setUniform("lightPosition", pointLight.getWorldPosition())
+
+        lightpool.bind(lightningShader)
+
         gBufferObject.gPosition.bind(0)
         lightningShader.setUniform("gPosition", 0)
         gBufferObject.gNormal.bind(1)
         lightningShader.setUniform("gNormal", 1)
-        gBufferObject.gAlbedo.bind(2)
-        lightningShader.setUniform("gAlbedo", 2)
-        blurFramebuffer.blurFramebufferTexture.bind(3)
-        lightningShader.setUniform("ssao", 3)
-        screenQuadMesh.render(); GLError.checkThrow()*/
-
-        //println("${buf.get(0)} : ${buf.get(1)} : ${buf.get(2)} : ${buf.get(3)}")
-
-        /*glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
-        glEnable(GL11.GL_DEPTH_TEST)
-        staticShader.use()
-        cam.bind(staticShader)
+        gBufferObject.gDiffTex.bind(2)
+        lightningShader.setUniform("gDiff", 2)
+        gBufferObject.gEmitTex.bind(3)
+        lightningShader.setUniform("gEmit", 3)
+        gBufferObject.gEmitTex.bind(4)
+        lightningShader.setUniform("gSpec", 4)
         blurFramebuffer.blurFramebufferTexture.bind(5)
-        staticShader.setUniform("ssao", 5)
-        pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader,"spotLight", Matrix4f())
-        lightCycle?.render(staticShader)
-        ground.render(staticShader)
-        rob?.render(staticShader)*/
+        lightningShader.setUniform("ssao", 5)
+        gBufferObject.gShininess.bind(6)
+        lightningShader.setUniform("gShininess", 6)
+
+        screenQuadMesh.render(); GLError.checkThrow()
 
 
         //------------------------Janine---------------------//
@@ -274,18 +279,24 @@ class Scene(private val window: GameWindow) {
         //
         //Rendert auf den Bildschirm kann aus kommentiert werden
         //
-        /*glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
+/*
+        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
         glEnable(GL11.GL_DEPTH_TEST)
         staticShader.use()
         cam.bind(staticShader)
         pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader,"spotLight", Matrix4f())
+        spotLight.bind(staticShader,"spotLight")
         lightCycle?.render(staticShader)
-        ground.render(staticShader)*/
+        ground.render(staticShader)
+
+ */
+
+
 
 
         //------------------------Nico---------------------//
         //Set the cameras for the two portals
+/*
         portal1.setCameraParent(portal2, lightCycle)
         portal2.setCameraParent(portal1, lightCycle)
 
@@ -299,7 +310,7 @@ class Scene(private val window: GameWindow) {
         portal1.renderToFramebufferStart(staticShader)
         //cam.bind(staticShader)
         pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader, "spotLight", Matrix4f())
+        spotLight.bind(staticShader, "spotLight")
         lightCycle?.render(staticShader)
         ground.render(staticShader)
         portalShader.use()
@@ -309,9 +320,9 @@ class Scene(private val window: GameWindow) {
         portal1.renderToFramebufferStop()
 
         portal2.renderToFramebufferStart(staticShader)
-        //cam.bind(staticShader)
+        cam.bind(staticShader)
         pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader, "spotLight", Matrix4f())
+        spotLight.bind(staticShader, "spotLight")
         lightCycle?.render(staticShader)
         ground.render(staticShader)
         portalShader.use()
@@ -336,6 +347,10 @@ class Scene(private val window: GameWindow) {
         portal1.render(portalShader)
         portal2.render(portalShader)
         glEnable(GL_CULL_FACE); GLError.checkThrow()
+        */
+
+
+
 
     }
 
@@ -378,13 +393,26 @@ class Scene(private val window: GameWindow) {
         }else if(window.getKeyState(GLFW.GLFW_KEY_2)) {
             currentImage = gBufferObject.gNormal
         }else if(window.getKeyState(GLFW.GLFW_KEY_3)) {
-            currentImage = gBufferObject.gAlbedo
+            currentImage = gBufferObject.gDiffTex
         }else if(window.getKeyState(GLFW.GLFW_KEY_4)) {
-            currentImage = ssaoTextureFramebuffer.ssaoNoiseTexture
+            currentImage = gBufferObject.gEmitTex
         }else if(window.getKeyState(GLFW.GLFW_KEY_5)) {
-            currentImage = ssaoTextureFramebuffer.ssaoColorTexture
+            currentImage = gBufferObject.gSpecTex
         }else if(window.getKeyState(GLFW.GLFW_KEY_6)) {
+            currentImage = gBufferObject.gShininess
+        }else if(window.getKeyState(GLFW.GLFW_KEY_7)) {
+            currentImage = ssaoTextureFramebuffer.ssaoNoiseTexture
+        }else if(window.getKeyState(GLFW.GLFW_KEY_8)) {
+            currentImage = ssaoTextureFramebuffer.ssaoColorTexture
+        }else if(window.getKeyState(GLFW.GLFW_KEY_9)) {
             currentImage = blurFramebuffer.blurFramebufferTexture
+        }
+        if(window.getKeyState(GLFW.GLFW_KEY_F)) {
+           if(spotLight.color == Vector3i(255, 255, 255))
+               spotLight.color = Vector3i(0, 0, 0)
+            else
+               spotLight.color = Vector3i(255, 255, 255)
+
         }
 
 

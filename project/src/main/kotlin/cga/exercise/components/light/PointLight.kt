@@ -4,10 +4,10 @@ import cga.exercise.components.geometry.Transformable
 import cga.exercise.components.shader.ShaderProgram
 import org.joml.Vector3f
 import org.joml.Vector3i
-import java.awt.Color
-import java.text.FieldPosition
 
-open class PointLight(position: Vector3f, var color: Vector3i =  Vector3i(255)) : Transformable(), IPointLight {
+open class PointLight(position: Vector3f, var color: Vector3i =  Vector3i(255)) : Transformable(), ILight {
+
+    override val name = "pointlight"
 
     var constantAttenuation : Float = 0.3f
     var linearAttenuation : Float = 0.5f
