@@ -9,6 +9,7 @@ out struct VertexData
     vec3 fragPos;
     vec2 texCoords;
     vec3 normal;
+    vec4 screenSpaceUV;
 } vertexdata;
 
 uniform mat4 model_matrix;
@@ -27,4 +28,7 @@ void main()
     vertexdata.normal = normalMatrix * normal;
 
     gl_Position = projection_matrix * viewPos;
+
+    vertexdata.screenSpaceUV = projection_matrix * viewPos;
+
 }

@@ -2,6 +2,7 @@ package cga.exercise.components.gameobjects
 
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.framebuffer.GeometryFramebuffer
+import cga.exercise.components.framebuffer.SimpleFramebuffer
 import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
 import cga.exercise.components.geometry.Renderable
@@ -28,8 +29,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     - Function to generate current Material (Texture from camera)
     */
 
-    private var framebuffer : GeometryFramebuffer
-    private var portalTexture : Texture2D
+    private var framebuffer : SimpleFramebuffer
     private var portalCamTexture : Texture2D
     private var portalMaterial : Material
     private var portalMaterialCam : Material
@@ -51,11 +51,14 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         val attrNorm = VertexAttribute(3, GL11.GL_FLOAT, stride, 5 * 4) //normalval
         val vertexAttributes = arrayOf<VertexAttribute>(attrPos, attrTC, attrNorm)
 
+
+        //Create Framebuffer
+        framebuffer = SimpleFramebuffer(window.framebufferWidth, window.framebufferHeight)
+
         //Use Ground Textures as default textures, 'cause I'm too lazy to create default portal textures
-        portalTexture = Texture2D("assets/textures/ground_diff.png", true)
         portalCamTexture = Texture2D("assets/textures/ground_diff.png", true)
-        portalTexture.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_NEAREST, GL11.GL_NEAREST)
-        portalMaterial = Material(portalTexture, portalTexture, portalTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
+        portalMaterial = Material(framebuffer.framebufferTexture, Texture2D("assets/textures/con_wall_1_emit.png", false), framebuffer.framebufferTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
+        portalMaterial.emitColor = Vector3f(1f)
         portalMaterialCam = Material(portalCamTexture, portalCamTexture, portalCamTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
 
         //load an object and create a mesh
@@ -80,6 +83,10 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalFrame = Renderable(mutableListOf(meshPortalFrame))*/
         //portalFrame = ModelLoader.loadModel("assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
         portalFrame = ModelLoader.loadModel("assets/models/portal/portal_frame.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
+        portalFrame?.meshes?.get(0)?.material?.emitColor = frameColor
+        portalFrame?.meshes?.get(0)?.material?.diff = Texture2D("assets/textures/ground_diff.png", false)
+        portalFrame?.meshes?.get(0)?.material?.emit = Texture2D("assets/textures/ground_diff.png", false)
+        portalFrame?.meshes?.get(0)?.material?.specular = Texture2D("assets/textures/ground_diff.png", false)
 
         //Portal & Frame transformation
         portalWall.rotateLocal(rotx,roty,rotz)
@@ -89,9 +96,6 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalFrame?.rotateLocal(rotx,roty,rotz)
         portalFrame?.translateGlobal(Vector3f(x,y,z))
         portalFrame?.scaleLocal(Vector3f(1f, 0.8f, 0.8f))
-
-        //Create Framebuffer
-        framebuffer = GeometryFramebuffer(window.framebufferWidth, window.framebufferHeight)
 
         //Define camera
         camera = TronCamera()
@@ -149,7 +153,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
             val checkdir = ((p.roty - roty) + (180 * rangecheck)).toInt()
 
-            println(camdir)
+            //println(camdir)
 
             if (checkdir == 0 || checkdir == 360 || checkdir == -360) {
                 val setx = playerWorldPos.x - portalWall.getWorldPosition().x + pWorldPos.x
@@ -225,15 +229,6 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         }
     }
 
-    // Generates portal texture
-    fun generateTexture() {
-        screenShader.use(); GLError.checkThrow()
-        val currentImage = framebuffer.gDiffTex
-        currentImage.bind(0)
-        screenShader.setUniform("tex", 0)
-        portalTexture = framebuffer.gDiffTex
-    }
-
     // Starts rendering to Framebuffer
     fun renderToFramebufferStart(shaderProgram: ShaderProgram) {
         framebuffer.startRender(shaderProgram); GLError.checkThrow()
@@ -252,13 +247,11 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
     // Renders portals with the portalShader (which will be set when calling this function)
     fun render(shaderProgram: ShaderProgram) {
+        shaderProgram.use()
 
-        portalMaterial = Material(portalTexture, portalTexture, portalTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
-        portalWall.meshes[0].material = portalMaterial
-
-        shaderProgram.setUniform("frameColor", Vector3f(1f, 1f, 1f))
+        shaderProgram.setUniform("isPortal", 1.0f)
         portalWall.render(shaderProgram)
-        shaderProgram.setUniform("frameColor", frameColor)
+        shaderProgram.setUniform("isPortal", 0.0f)
         portalFrame?.render(shaderProgram)
 
         //Only for debugging

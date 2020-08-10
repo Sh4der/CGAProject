@@ -12,6 +12,8 @@ uniform sampler2D gDiff;
 uniform sampler2D gEmit;
 uniform sampler2D gSpec;
 uniform sampler2D gShininess;
+uniform sampler2D gEmitColor;
+uniform sampler2D gIsPortal;
 
 
 uniform sampler2D ssao;
@@ -65,6 +67,7 @@ vec3 calcPointlight(Pointlight curPointlight, vec3 FragPos, vec3 Normal, vec3 Di
     float attenuation = 1.0 / (1.0 + curPointlight.LinearAttenuation * distance + curPointlight.QuadraticAttenuation * distance * distance);
     diffuse *= attenuation;
     specular *= attenuation;
+
     vec3 ambient = 0.1 * curPointlight.Color * attenuation * Diffuse * AmbientOcclusion;
 
     return diffuse + specular + ambient;
@@ -112,21 +115,31 @@ void main()
     vec3 Emit = texture(gEmit, ioTexCoords).rgb;
     vec3 Spec = texture(gSpec, ioTexCoords).rgb;
     float Shininess = texture(gShininess, ioTexCoords).x;
+    vec3 EmitColor = texture(gEmitColor, ioTexCoords).rgb;
+    float IsPortal = texture(gIsPortal, ioTexCoords).r;
+
 
     float AmbientOcclusion = texture(ssao, ioTexCoords).r;
 
 
     vec3 lighting  = vec3(0f);
-    lighting += Emit * vec3(0f, 1f, 0f);
+    lighting += Emit * EmitColor;
+    if(IsPortal <= 0.01)
+    {
+        for(int i = 0; i < numPointlights; i++)
+        {
+            lighting += calcPointlight(pointlight[i], FragPos, Normal, Diffuse, Spec, Shininess, AmbientOcclusion);
+        }
+        for(int i = 0; i < numSpotlights; i++)
+        {
+            lighting += calcSpotlight(spotlight[i], FragPos, Normal, Diffuse, Spec, Shininess, AmbientOcclusion);
+        }
+    }
+    else
+    {
+        lighting += Diffuse;
+    }
 
-    for(int i = 0; i < numPointlights; i++)
-    {
-        lighting += calcPointlight(pointlight[i], FragPos, Normal, Diffuse, Spec, Shininess, AmbientOcclusion);
-    }
-    for(int i = 0; i < numSpotlights; i++)
-    {
-        lighting += calcSpotlight(spotlight[i], FragPos, Normal, Diffuse, Spec, Shininess, AmbientOcclusion);
-    }
 
 
     //FragColor = vec4(vec3(AmbientOcclusion), 1.0f);

@@ -9,6 +9,7 @@ open class PointLight(position: Vector3f, var color: Vector3i =  Vector3i(255)) 
 
     override val name = "pointlight"
 
+
     var constantAttenuation : Float = 0.3f
     var linearAttenuation : Float = 0.5f
     var quadraticAttenuation : Float = 0.1f
