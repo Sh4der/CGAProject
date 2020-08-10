@@ -74,7 +74,9 @@ class Scene(private val window: GameWindow) {
 
     private val rob : Renderable?
 
-    private val lightpool  = Lightpool()
+    private val lightPool  = Lightpool()
+
+    private var cellShading : Int = 0
 
     //scene setup
     init {
@@ -157,26 +159,26 @@ class Scene(private val window: GameWindow) {
         //camOverview.parent = lightCycle!!
 
         pointLight = PointLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255))
-        pointLight.parent = player
-        lightpool.add(pointLight)
+        //pointLight.parent = player
+        //lightpool.add(pointLight)
 
         for (i in 0..20)
         {
             val light = PointLight(Vector3f((Random.nextFloat() * 2.0f - 1.0f) * 20f, 1f, (Random.nextFloat() * 2.0f - 1.0f) * 20f), Vector3i(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255)))
-            lightpool.add(light)
+            lightPool.add(light)
         }
         for (i in 0..30)
         {
             val light = SpotLight(Vector3f((Random.nextFloat() * 2.0f - 1.0f) * 20f, (Random.nextFloat() * 2.0f - 1.0f) * 20f, (Random.nextFloat() * 2.0f - 1.0f) * 20f), Vector3i(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255)), 16.5f, 20.5f)
             light.rotateLocal((Random.nextFloat() * 2.0f - 1.0f) * 360f, (Random.nextFloat() * 2.0f - 1.0f) * 360f, (Random.nextFloat() * 2.0f - 1.0f) * 360f)
-            lightpool.add(light)
+            lightPool.add(light)
         }
 
 
         spotLight = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
 
         spotLight.parent = player
-        lightpool.add(spotLight)
+        lightPool.add(spotLight)
 
 
         val quadArray = floatArrayOf(
@@ -224,8 +226,8 @@ class Scene(private val window: GameWindow) {
         portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 8.1f, 3f, 5f, 0f, 180f, 0f)
 
 
-        rob = ModelLoader.loadModel("J:/untitled.dae", 0f, 0f, 0f)
-        rob?.scaleLocal(Vector3f(0.3f))
+        rob = ModelLoader.loadModel("assets/models/kugel.obj", 0f, 0f, 0f)
+        rob?.scaleLocal(Vector3f(4f))
         rob?.meshes?.get(0)?.material?.emit = emitTex
         rob?.meshes?.get(0)?.material?.specular = specTex
         rob?.meshes?.get(0)?.material?.diff = diffTex
@@ -335,6 +337,7 @@ class Scene(private val window: GameWindow) {
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
         rob?.render(gBufferShader)
+        wall.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
         portal2.render(gBufferShader)
@@ -356,7 +359,8 @@ class Scene(private val window: GameWindow) {
 
         portal1.renderToFramebufferStart(lightningShader)
         portal1.bindPortalCamera(lightningShader)
-        lightpool.bind(lightningShader)
+        lightPool.bind(lightningShader)
+        lightningShader.setUniform("cellShading", cellShading)
         gBufferObjectPortal1.gPosition.bind(0)
         lightningShader.setUniform("gPosition", 0)
         gBufferObjectPortal1.gNormal.bind(1)
@@ -385,6 +389,7 @@ class Scene(private val window: GameWindow) {
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
         rob?.render(gBufferShader)
+        wall.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
         portal2.render(gBufferShader)
@@ -405,7 +410,8 @@ class Scene(private val window: GameWindow) {
         portal2.renderToFramebufferStart(lightningShader)
         portal2.bindPortalCamera(lightningShader)
         //portal1.render(portalShader)
-        lightpool.bind(lightningShader)
+        lightPool.bind(lightningShader)
+        lightningShader.setUniform("cellShading", cellShading)
 
         gBufferObjectPortal2.gPosition.bind(0)
         lightningShader.setUniform("gPosition", 0)
@@ -483,6 +489,7 @@ class Scene(private val window: GameWindow) {
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
         rob?.render(gBufferShader)
+        wall.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
         portal2.render(gBufferShader)
@@ -514,8 +521,8 @@ class Scene(private val window: GameWindow) {
 
         lightningShader.use(); GLError.checkThrow()
         cam.bind(lightningShader)
-
-        lightpool.bind(lightningShader)
+        lightPool.bind(lightningShader)
+        lightningShader.setUniform("cellShading", cellShading)
 
         gBufferObject.gPosition.bind(0)
         lightningShader.setUniform("gPosition", 0)
@@ -601,6 +608,10 @@ class Scene(private val window: GameWindow) {
                spotLight.color = Vector3i(255, 255, 255)
 
         }
+        if(window.getKeyState(GLFW.GLFW_KEY_C))
+            cellShading = if(cellShading == 1) 0 else 1
+
+
 
 
         //Check if player goes through portal
