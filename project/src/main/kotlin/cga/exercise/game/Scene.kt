@@ -548,7 +548,8 @@ class Scene(private val window: GameWindow) {
 
     }
 
-
+    private var deltaF = 0f;
+    private var deltaC = 0f;
     fun update(dt: Float, t: Float) {
         //var speed = 0f
         var vspeed = 0f
@@ -601,16 +602,18 @@ class Scene(private val window: GameWindow) {
         }else if(window.getKeyState(GLFW.GLFW_KEY_9)) {
             currentImage = blurFramebuffer.framebufferTexture
         }
-        if(window.getKeyState(GLFW.GLFW_KEY_F)) {
+        if(window.getKeyState(GLFW.GLFW_KEY_F) && t - deltaF >= 0.5f) {
+            deltaF = t
            if(spotLight.color == Vector3i(255, 255, 255))
                spotLight.color = Vector3i(0, 0, 0)
             else
                spotLight.color = Vector3i(255, 255, 255)
 
         }
-        if(window.getKeyState(GLFW.GLFW_KEY_C))
-            cellShading = if(cellShading == 1) 0 else 1
-
+        if(window.getKeyState(GLFW.GLFW_KEY_C) && t - deltaC >= 0.5f) {
+            deltaC = t
+            cellShading = if (cellShading == 1) 0 else 1
+        }
 
 
 
