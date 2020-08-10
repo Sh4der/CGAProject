@@ -345,7 +345,7 @@ class Scene(private val window: GameWindow) {
         gBufferObjectPortal1.stopRender()
 
         ssaoTextureFramebufferPortal1.startRender(ssaoColorShader, gBufferObjectPortal1)
-        portal1.bindPortalCamera(ssaoColorShader); GLError.checkThrow()
+        portal1.bindPortalCameraPRojectionMatrix(ssaoColorShader); GLError.checkThrow()
         screenQuadMesh.render()
         ssaoTextureFramebufferPortal1.stopRender()
 
@@ -358,7 +358,7 @@ class Scene(private val window: GameWindow) {
 
 
         portal1.renderToFramebufferStart(lightningShader)
-        portal1.bindPortalCamera(lightningShader)
+        portal1.bindPortalCameraViewMatrix(lightningShader)
         lightPool.bind(lightningShader)
         lightningShader.setUniform("cellShading", cellShading)
         gBufferObjectPortal1.gPosition.bind(0)
@@ -397,7 +397,7 @@ class Scene(private val window: GameWindow) {
         gBufferObjectPortal2.stopRender()
 
         ssaoTextureFramebufferPortal2.startRender(ssaoColorShader, gBufferObjectPortal2)
-        portal2.bindPortalCamera(ssaoColorShader); GLError.checkThrow()
+        portal2.bindPortalCameraPRojectionMatrix(ssaoColorShader); GLError.checkThrow()
         screenQuadMesh.render()
         ssaoTextureFramebufferPortal2.stopRender()
 
@@ -408,7 +408,7 @@ class Scene(private val window: GameWindow) {
         blurFramebufferPortal2.stopRender()
 
         portal2.renderToFramebufferStart(lightningShader)
-        portal2.bindPortalCamera(lightningShader)
+        portal2.bindPortalCameraViewMatrix(lightningShader)
         //portal1.render(portalShader)
         lightPool.bind(lightningShader)
         lightningShader.setUniform("cellShading", cellShading)
@@ -497,7 +497,7 @@ class Scene(private val window: GameWindow) {
         gBufferObject.stopRender()
 
         ssaoTextureFramebuffer.startRender(ssaoColorShader, gBufferObject)
-        cam.bind(ssaoColorShader)
+        cam.bindProjectionMatrix(ssaoColorShader)
         screenQuadMesh.render()
         ssaoTextureFramebuffer.stopRender()
 
@@ -520,7 +520,7 @@ class Scene(private val window: GameWindow) {
         glDisable(GL_DEPTH_TEST)
 
         lightningShader.use(); GLError.checkThrow()
-        cam.bind(lightningShader)
+        cam.bindViewMatrix(lightningShader)
         lightPool.bind(lightningShader)
         lightningShader.setUniform("cellShading", cellShading)
 
@@ -545,6 +545,7 @@ class Scene(private val window: GameWindow) {
         lightningShader.setUniform("ssao", 7)
 
         screenQuadMesh.render(); GLError.checkThrow()
+
 
     }
 

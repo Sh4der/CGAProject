@@ -13,6 +13,8 @@ import java.nio.file.Paths
  * Created by Fabian on 16.09.2017.
  */
 class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
+    private val uniformLocations = HashMap<String, Int>()
+
     private var programID: Int = 0
     //Matrix buffers for setting matrix uniforms. Prevents allocation for each uniform
     private val m4x4buf: FloatBuffer = BufferUtils.createFloatBuffer(16)
@@ -43,7 +45,7 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
      */
     fun setUniform(name: String, value: Float): Boolean {
         if (programID == 0) return false
-        val loc = GL20.glGetUniformLocation(programID, name)
+        val loc = getUniformLocation(programID, name)
         if (loc != -1) {
             GL20.glUniform1f(loc, value)
             return true
@@ -58,7 +60,7 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
      */
     fun setUniform(name: String, value: Vector2f): Boolean {
         if (programID == 0) return false
-        val loc = GL20.glGetUniformLocation(programID, name)
+        val loc = getUniformLocation(programID, name)
         if (loc != -1) {
             GL20.glUniform2f(loc, value.x, value.y)
             return true
@@ -74,7 +76,7 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
      */
     fun setUniform(name: String, value: Vector3f): Boolean {
         if (programID == 0) return false
-        val loc = GL20.glGetUniformLocation(programID, name)
+        val loc = getUniformLocation(programID, name)
         if (loc != -1) {
             GL20.glUniform3f(loc, value.x, value.y, value.z)
             return true
@@ -92,7 +94,7 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
         if (programID == 0) return false
         for (i in value.indices)
         {
-            val loc = GL20.glGetUniformLocation(programID, "$name[$i]")
+            val loc = getUniformLocation(programID, "$name[$i]")
             if (loc != -1) {
                 GL20.glUniform3f(loc, value[i].x, value[i].y, value[i].z)
             }
@@ -111,7 +113,7 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
      */
     fun setUniform(name: String, value: Vector3i): Boolean {
         if (programID == 0) return false
-        val loc = GL20.glGetUniformLocation(programID, name)
+        val loc = getUniformLocation(programID, name)
         if (loc != -1) {
             GL20.glUniform3i(loc, value.x, value.y, value.z)
             return true
@@ -128,7 +130,7 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
      */
     fun setUniform(name: String, value: Int): Boolean {
         if (programID == 0) return false
-        val loc = GL20.glGetUniformLocation(programID, name)
+        val loc = getUniformLocation(programID, name)
         if (loc != -1) {
             GL20.glUniform1i(loc, value)
             return true
@@ -144,7 +146,7 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
      */
     fun setUniform(name: String, value: Matrix4f): Boolean {
         if (programID == 0) return false
-        val loc = GL20.glGetUniformLocation(programID, name)
+        val loc = getUniformLocation(programID, name)
         if (loc != -1) {
 
             value.get(m4x4buf)
@@ -210,5 +212,20 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
         GL20.glDetachShader(programID, fShader)
         GL20.glDeleteShader(vShader)
         GL20.glDeleteShader(fShader)
+    }
+
+
+    private fun getUniformLocation(programID : Int, name : String) : Int
+    {
+        if(uniformLocations.containsKey(name))
+            return uniformLocations[name] as Int
+        else
+        {
+            val loc = GL20.glGetUniformLocation(programID, name)
+            if(loc != -1)
+                uniformLocations[name] = loc
+            println("${uniformLocations[name]} : $name")
+            return loc
+        }
     }
 }

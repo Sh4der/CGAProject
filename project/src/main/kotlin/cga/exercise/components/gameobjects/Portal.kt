@@ -232,7 +232,6 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     // Starts rendering to Framebuffer
     fun renderToFramebufferStart(shaderProgram: ShaderProgram) {
         framebuffer.startRender(shaderProgram); GLError.checkThrow()
-        camera.bind(shaderProgram)
     }
 
     // Stops rendering to Framebuffer
@@ -243,6 +242,14 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     // Binds Portal Camera
     fun bindPortalCamera(shaderProgram: ShaderProgram) {
         camera.bind(shaderProgram)
+    }
+    // Binds Portal Camera
+    fun bindPortalCameraViewMatrix(shaderProgram: ShaderProgram) {
+        camera.bindViewMatrix(shaderProgram)
+    }
+    // Binds Portal Camera
+    fun bindPortalCameraPRojectionMatrix(shaderProgram: ShaderProgram) {
+        camera.bindProjectionMatrix(shaderProgram)
     }
 
     // Renders portals with the portalShader (which will be set when calling this function)

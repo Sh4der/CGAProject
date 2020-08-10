@@ -20,7 +20,14 @@ class TronCamera : Transformable(), ICamera {
     }
 
     override fun bind(shader: ShaderProgram) {
+        bindViewMatrix(shader)
+        bindProjectionMatrix(shader)
+    }
+
+    override fun bindViewMatrix(shader: ShaderProgram){
         shader.setUniform("view_matrix", getCalculateViewMatrix())
+    }
+    override fun bindProjectionMatrix(shader: ShaderProgram){
         shader.setUniform("projection_matrix", getCalculateProjectionMatrix())
     }
 }

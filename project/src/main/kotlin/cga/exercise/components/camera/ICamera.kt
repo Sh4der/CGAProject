@@ -25,5 +25,7 @@ interface ICamera {
     fun getCalculateProjectionMatrix(): Matrix4f
 
     fun bind(shader: ShaderProgram)
+    fun bindViewMatrix(shader: ShaderProgram)
+    fun bindProjectionMatrix(shader: ShaderProgram)
 
 }
