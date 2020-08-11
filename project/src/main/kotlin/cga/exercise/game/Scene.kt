@@ -117,6 +117,7 @@ class Scene(private val window: GameWindow) {
         }
         player?.meshes?.get(2)?.material?.emitColor = Vector3f(1f, 0f, 0f)
         player?.scaleLocal(Vector3f(1f))
+        player?.setPosition(-5f,0f,8f)
 
 
         val diffTex = Texture2D("assets/textures/con_wall_1.png", true)
@@ -145,6 +146,7 @@ class Scene(private val window: GameWindow) {
         wall = Renderable(mutableListOf(meshGround))
         wall.rotateLocal(90f, 0f, 0f)
         wall2 = Renderable(mutableListOf(meshGround))
+        wall2.translateLocal(Vector3f(8f,0f,0f))
         wall2.rotateLocal(90f, 0f, 90f)
 
 
@@ -222,8 +224,12 @@ class Scene(private val window: GameWindow) {
 
 
         //Portal Setup
-        portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), -8f, 3f, -5f, 0f, 270f, 0f)
-        portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 8.1f, 3f, 5f, 0f, 180f, 0f)
+        /*
+        portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), -5f, 3f, 0.25f, 0f, 270f, 0f)
+        portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 7.75f, 3f, 5f, 0f, 180f, 0f)
+        */
+        portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), -5f, 3f, -0.235f, 0f, 270f, 0f)
+        portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 8.235f, 3f, 5f, 0f, 180f, 0f)
 
 
         rob = ModelLoader.loadModel("assets/models/kugel.obj", 0f, 0f, 0f)
@@ -333,14 +339,16 @@ class Scene(private val window: GameWindow) {
         //portal2.generateTexture()
 
         gBufferObjectPortal1.startRender(gBufferShader)
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal1.bindPortalCamera(gBufferShader); GLError.checkThrow()
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
-        rob?.render(gBufferShader)
+        //rob?.render(gBufferShader)
         wall.render(gBufferShader)
+        wall2.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
-        portal2.render(gBufferShader)
+        //portal2.renderFrameOnly(gBufferShader)
         glEnable(GL_CULL_FACE)
         gBufferObjectPortal1.stopRender()
 
@@ -358,6 +366,7 @@ class Scene(private val window: GameWindow) {
 
 
         portal1.renderToFramebufferStart(lightningShader)
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal1.bindPortalCameraViewMatrix(lightningShader)
         lightPool.bind(lightningShader)
         lightningShader.setUniform("cellShading", cellShading)
@@ -385,13 +394,15 @@ class Scene(private val window: GameWindow) {
 
 
         gBufferObjectPortal2.startRender(gBufferShader)
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal2.bindPortalCamera(gBufferShader); GLError.checkThrow()
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
-        rob?.render(gBufferShader)
+        //rob?.render(gBufferShader)
         wall.render(gBufferShader)
+        wall2.render(gBufferShader)
         glDisable(GL_CULL_FACE)
-        portal1.render(gBufferShader)
+        //portal1.renderFrameOnly(gBufferShader)
         portal2.render(gBufferShader)
         glEnable(GL_CULL_FACE)
         gBufferObjectPortal2.stopRender()
@@ -408,11 +419,10 @@ class Scene(private val window: GameWindow) {
         blurFramebufferPortal2.stopRender()
 
         portal2.renderToFramebufferStart(lightningShader)
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal2.bindPortalCameraViewMatrix(lightningShader)
-        //portal1.render(portalShader)
         lightPool.bind(lightningShader)
         lightningShader.setUniform("cellShading", cellShading)
-
         gBufferObjectPortal2.gPosition.bind(0)
         lightningShader.setUniform("gPosition", 0)
         gBufferObjectPortal2.gNormal.bind(1)
@@ -488,8 +498,13 @@ class Scene(private val window: GameWindow) {
         cam.bind(gBufferShader); GLError.checkThrow()
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
-        rob?.render(gBufferShader)
-        wall.render(gBufferShader)
+        //rob?.render(gBufferShader)
+        if (!(portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
+            wall.render(gBufferShader)
+        }
+        if (!(portal2.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
+            wall2.render(gBufferShader)
+        }
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
         portal2.render(gBufferShader)
@@ -629,6 +644,9 @@ class Scene(private val window: GameWindow) {
             player?.setRotationA(portal2.portalCam.getRotationA())
             player?.setPosition(portal2.goingOutCoord.x, portal2.goingOutCoord.y, portal2.goingOutCoord.z)
         }
+
+        portal1.setCameraParent(portal2, player)
+        portal2.setCameraParent(portal1, player)
 
     }
 

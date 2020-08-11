@@ -5,8 +5,8 @@ out float FragColor;
 in vec2 ioTexCoords;
 
 //constants to configure the ssao shading
-const int sampleCount = 64;
-const float radius = 0.5f;
+const int sampleCount = 16; //64 vorher
+const float radius = 1.5f; //0.5 vorher
 const float bias = 0.025f;
 
 //uniform Textures from the gBuffer FRamebuffer
