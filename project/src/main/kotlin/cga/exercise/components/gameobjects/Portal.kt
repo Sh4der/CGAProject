@@ -85,7 +85,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
         portalFrame = Renderable(mutableListOf(meshPortalFrame))*/
         //portalFrame = ModelLoader.loadModel("assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
-        portalFrame = ModelLoader.loadModel("assets/models/portal/portal_frame.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
+        portalFrame = ModelLoader.loadModel("assets/models/portal/portal_frame_flat.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
         portalFrame?.meshes?.get(0)?.material?.emitColor = frameColor
         portalFrame?.meshes?.get(0)?.material?.diff = Texture2D("assets/textures/ground_diff.png", false)
         portalFrame?.meshes?.get(0)?.material?.emit = Texture2D("assets/textures/ground_diff.png", false)

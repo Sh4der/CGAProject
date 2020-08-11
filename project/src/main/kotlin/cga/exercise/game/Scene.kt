@@ -233,7 +233,8 @@ class Scene(private val window: GameWindow) {
 
 
         rob = ModelLoader.loadModel("assets/models/kugel.obj", 0f, 0f, 0f)
-        rob?.scaleLocal(Vector3f(4f))
+        rob?.setPosition(-10f,0f,10f)
+        rob?.scaleLocal(Vector3f(2f))
         rob?.meshes?.get(0)?.material?.emit = emitTex
         rob?.meshes?.get(0)?.material?.specular = specTex
         rob?.meshes?.get(0)?.material?.diff = diffTex
@@ -343,7 +344,7 @@ class Scene(private val window: GameWindow) {
         portal1.bindPortalCamera(gBufferShader); GLError.checkThrow()
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
-        //rob?.render(gBufferShader)
+        rob?.render(gBufferShader)
         wall.render(gBufferShader)
         wall2.render(gBufferShader)
         glDisable(GL_CULL_FACE)
@@ -398,7 +399,7 @@ class Scene(private val window: GameWindow) {
         portal2.bindPortalCamera(gBufferShader); GLError.checkThrow()
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
-        //rob?.render(gBufferShader)
+        rob?.render(gBufferShader)
         wall.render(gBufferShader)
         wall2.render(gBufferShader)
         glDisable(GL_CULL_FACE)
@@ -498,7 +499,7 @@ class Scene(private val window: GameWindow) {
         cam.bind(gBufferShader); GLError.checkThrow()
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
-        //rob?.render(gBufferShader)
+        rob?.render(gBufferShader)
         if (!(portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
             wall.render(gBufferShader)
         }
