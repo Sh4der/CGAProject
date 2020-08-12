@@ -158,7 +158,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
             val checkdir = ((p.roty - roty) + (180 * rangecheck)).toInt()
 
-            println(camdir)
+            //println(camdir)
 
             var camOffsetx = 0f
             var camOffsetz = 0f
@@ -214,26 +214,26 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
             if (roty == 0f) {
                 collisionBox3Dp1 = Vector3f(x-0.3f, y-3f, z-1.5f)
                 collisionBox3Dp2 = Vector3f(x+0.3f, y+3f, z+1.5f)
-                collisionAlmostBox3Dp1 = Vector3f(x-0.4f, y-3f, z-1.5f)
-                collisionAlmostBox3Dp2 = Vector3f(x+0.4f, y+3f, z+1.5f)
+                collisionAlmostBox3Dp1 = Vector3f(x-0.6f, y-3f, z-1.5f)
+                collisionAlmostBox3Dp2 = Vector3f(x+0.6f, y+3f, z+1.5f)
             }
             else if (roty == 180f) {
                 collisionBox3Dp1 = Vector3f(x-0.3f, y-3f, z-1.5f)
                 collisionBox3Dp2 = Vector3f(x+0.3f, y+3f, z+1.5f)
-                collisionAlmostBox3Dp1 = Vector3f(x-0.4f, y-3f, z-1.5f)
-                collisionAlmostBox3Dp2 = Vector3f(x+0.4f, y+3f, z+1.5f)
+                collisionAlmostBox3Dp1 = Vector3f(x-0.6f, y-3f, z-1.5f)
+                collisionAlmostBox3Dp2 = Vector3f(x+0.6f, y+3f, z+1.5f)
             }
             else if (roty == 270f) {
                 collisionBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.3f)
                 collisionBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.3f)
-                collisionAlmostBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.4f)
-                collisionAlmostBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.4f)
+                collisionAlmostBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.6f)
+                collisionAlmostBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.6f)
             }
             else if (roty == 90f) {
                 collisionBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.3f)
                 collisionBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.3f)
-                collisionAlmostBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.4f)
-                collisionAlmostBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.4f)
+                collisionAlmostBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.6f)
+                collisionAlmostBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.6f)
             }
 
             goingOutCoord = Vector3f(portalCam.getWorldPosition().x, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z)

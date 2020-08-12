@@ -4,6 +4,7 @@ import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.framebuffer.SimpleFramebuffer
 import cga.exercise.components.framebuffer.GeometryFramebuffer
 import cga.exercise.components.framebuffer.SSAOTextureFramebuffer
+import cga.exercise.components.gameobjects.CollisionPool
 import cga.exercise.components.gameobjects.Portal
 import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
@@ -77,6 +78,11 @@ class Scene(private val window: GameWindow) {
     private val lightPool  = Lightpool()
 
     private var cellShading : Int = 0
+
+
+
+    //Collsions
+    private val collisionPool = CollisionPool()
 
     //scene setup
     init {
@@ -238,6 +244,12 @@ class Scene(private val window: GameWindow) {
         rob?.meshes?.get(0)?.material?.emit = emitTex
         rob?.meshes?.get(0)?.material?.specular = specTex
         rob?.meshes?.get(0)?.material?.diff = diffTex
+
+
+        //Add collisions
+        collisionPool.addCollision(-10f-2f,0f,10f-2f,-10f+2f,2f,10f+2f)
+        collisionPool.addCollision(-22f,0f,-1f,22f,22f,0.2f)
+        collisionPool.addCollision(8f-0.2f,0f,-22f,8f,22f,22f)
 
     }
 
@@ -500,12 +512,12 @@ class Scene(private val window: GameWindow) {
         ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
         rob?.render(gBufferShader)
-        if (!(portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
+        //if (!(portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
             wall.render(gBufferShader)
-        }
-        if (!(portal2.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
+        //}
+        //if (!(portal2.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
             wall2.render(gBufferShader)
-        }
+        //}
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
         portal2.render(gBufferShader)
@@ -567,29 +579,136 @@ class Scene(private val window: GameWindow) {
 
     private var deltaF = 0f;
     private var deltaC = 0f;
-    fun update(dt: Float, t: Float) {
-        //var speed = 0f
-        var vspeed = 0f
-        var hspeed = 0f
-        //var rotationDirection = 0f
-        //val turningCycleRadius = 3f
 
+    //Movement vars
+    var k_u = false; var k_d = false; var k_l = false; var k_r = false //Key directions
+    var hspeed = 0f //Horizontal speed
+    var vspeed = 0f //Vertical speed
+    val accel_const = 1.4f //Acceleration
+    val movespeedmax_const = 12f //Maximum Movementspeed
+    var direction = 0f// Player direction
+    var touchx = false//Check if the player is colliding with anything - x axis
+    var touchz = false//Check if the player is colliding with anything - z axis
+    var playerNewX = 0f
+    var playerNewZ = 0f
+
+    fun update(dt: Float, t: Float) {
+
+        val movespeedmax = movespeedmax_const * dt
+        val accel = accel_const * dt
+
+        //val accel = accel_const * 4 * dt
+        //hspeed = 0f
+        //vspeed = 0f
+
+        //Key states
+        k_u = window.getKeyState(GLFW.GLFW_KEY_W) //Up
+        k_d = window.getKeyState(GLFW.GLFW_KEY_S) //Down
+        k_l = window.getKeyState(GLFW.GLFW_KEY_A) //Left
+        k_r = window.getKeyState(GLFW.GLFW_KEY_D) //Right
+
+        hspeed *= 0.8f //Decrease speed over time
+        vspeed *= 0.8f
+        direction = player?.getYDirDeg()!!.toFloat()
+
+        if (k_u) {
+            hspeed = hspeed + lengthdir_x(accel,Math.toRadians(direction))//median(arrayListOf(-movespeedmax,movespeedmax,hspeed + lengthdir_x(accel,Math.toRadians(direction))))
+            vspeed = vspeed + lengthdir_z(accel,Math.toRadians(direction))//median(arrayListOf(-movespeedmax,movespeedmax,vspeed + lengthdir_z(accel,Math.toRadians(direction))))
+        }
+        if (k_d) {
+            hspeed = hspeed - lengthdir_x(accel,Math.toRadians(direction))//median(arrayListOf(-movespeedmax,movespeedmax,hspeed - lengthdir_x(accel,Math.toRadians(direction))))
+            vspeed = vspeed - lengthdir_z(accel,Math.toRadians(direction))//median(arrayListOf(-movespeedmax,movespeedmax,vspeed - lengthdir_z(accel,Math.toRadians(direction))))
+        }
+        if (k_l) {
+            hspeed = hspeed + lengthdir_x(accel,Math.toRadians(direction + 90))//median(arrayListOf(-movespeedmax,movespeedmax,hspeed + lengthdir_x(accel,Math.toRadians(direction + 90))))
+            vspeed = vspeed + lengthdir_z(accel,Math.toRadians(direction + 90))//median(arrayListOf(-movespeedmax,movespeedmax,vspeed + lengthdir_z(accel,Math.toRadians(direction + 90))))
+        }
+        if (k_r) {
+            hspeed = hspeed + lengthdir_x(accel,Math.toRadians(direction - 90))//median(arrayListOf(-movespeedmax,movespeedmax,hspeed + lengthdir_x(accel,Math.toRadians(direction - 90))))
+            vspeed = vspeed + lengthdir_z(accel,Math.toRadians(direction - 90))//median(arrayListOf(-movespeedmax,movespeedmax,vspeed + lengthdir_z(accel,Math.toRadians(direction - 90))))
+        }
+
+        //hspeed = Math.max(Math.min(hspeed, movespeedmax), -movespeedmax)
+        //vspeed = Math.max(Math.min(vspeed, movespeedmax), -movespeedmax)
+
+        println("HSPEED: ${hspeed} | VSPEED: $vspeed}")
+        //println(direction)
+
+        //Check for portal almost collision
+        if ((portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)) || (portal2.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
+            touchx = false
+            touchz = false
+        }
+        else {
+            touchx = collisionPool.checkPointCollision(player?.getWorldPosition()!!.x + hspeed, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)
+            touchz = collisionPool.checkPointCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z + vspeed)
+        }
+
+        //Check for X Axis
+        //touchx = collisionPool.checkPointCollision(player?.getWorldPosition()!!.x + hspeed, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)
+
+        if (!touchx) {
+            //player?.setPosition(player?.getWorldPosition()!!.x + hspeed,0f,0f)
+            playerNewX = player?.getWorldPosition()!!.x + hspeed
+        }
+        else {
+            hspeed = 0f
+        }
+
+        //Check for Z Axis
+        //touchz = collisionPool.checkPointCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z + vspeed)
+
+        if (!touchz) {
+            playerNewZ = player?.getWorldPosition()!!.z + vspeed
+        }
+        else {
+            vspeed = 0f
+        }
+
+        player?.setPosition(playerNewX,0f, playerNewZ)
+
+
+        /*
+        // OLD MOVEMENT CODE
         if(window.getKeyState(GLFW.GLFW_KEY_W)) {
             vspeed = -5f
+            val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(vspeed) * dt, player?.getYDir()!!.toFloat())
+            if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
+                player?.translateLocal(Vector3f(0f, 0f, vspeed * dt))
+            }
         }
         else if(window.getKeyState(GLFW.GLFW_KEY_S)) {
             vspeed = 5f
+            val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(vspeed) * dt, player?.getYDir()!!.toFloat() + Math.toRadians(180f))
+            if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
+                player?.translateLocal(Vector3f(0f, 0f, vspeed * dt))
+            }
         }
         if(window.getKeyState(GLFW.GLFW_KEY_A)) {
             //rotationDirection = -1f
             hspeed = -5f
+            val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(hspeed) * dt, player?.getYDir()!!.toFloat() + Math.toRadians(90f))
+            if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
+                player?.translateLocal(Vector3f(hspeed * dt, 0f, 0f))
+            }
         }
         else if(window.getKeyState(GLFW.GLFW_KEY_D)) {
             //rotationDirection = 1f
             hspeed = 5f
+            val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(hspeed) * dt, player?.getYDir()!!.toFloat() - Math.toRadians(90f))
+            if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
+                player?.translateLocal(Vector3f(hspeed * dt, 0f, 0f))
+            }
         }
+        */
 
-        player?.translateLocal(Vector3f(hspeed * dt, 0f, vspeed * dt))
+        //Check for collision
+        /*
+        val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(vspeed) * dt, player?.getYDir()!!.toFloat())
+        if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
+            player?.translateLocal(Vector3f(hspeed * dt, 0f, vspeed * dt))
+        }
+        */
 
         /*if(rotationDirection == 0f){
             lightCycle?.translateLocal(Vector3f(0f, 0f, speed * dt))
@@ -600,6 +719,35 @@ class Scene(private val window: GameWindow) {
         }*/
         //lightCycle?.meshes?.get(2)?.material?.emitColor = Vector3f((Math.sin(t) + 1f)/2, (Math.sin(t*2) + 1f)/2, (Math.sin(t*3) + 1f)/2)
 
+
+        //Check if player goes through portal
+        if (portal1.checkCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)) {
+            //lightCycle?.setPosition(portal1.portalCam.getWorldPosition().x - 0.35f, portal1.portalCam.getWorldPosition().y, portal1.portalCam.getWorldPosition().z) //Teleports player to the other portal
+            player?.setRotationA(portal1.portalCam.getRotationA())
+            player?.setPosition(portal1.goingOutCoord.x, portal1.goingOutCoord.y, portal1.goingOutCoord.z)
+            hspeed = 0f
+            vspeed = 0f
+        }
+        else if (portal2.checkCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)) {
+            //lightCycle?.setPosition(portal2.portalCam.getWorldPosition().x + 0.35f, portal2.portalCam.getWorldPosition().y, portal2.portalCam.getWorldPosition().z) //Teleports player to the other portal
+            player?.setRotationA(portal2.portalCam.getRotationA())
+            player?.setPosition(portal2.goingOutCoord.x, portal2.goingOutCoord.y, portal2.goingOutCoord.z)
+            hspeed = 0f
+            vspeed = 0f
+        }
+
+        portal1.setCameraParent(portal2, player)
+        portal2.setCameraParent(portal1, player)
+
+
+        //Lengthdir test
+        //val lengthdirTest = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, 5f, player?.getYDir()!!.toFloat())
+        //rob?.setPosition(lengthdirTest.x, lengthdirTest.y, lengthdirTest.z)
+        //println(player?.getYDirDeg()!!.toFloat())
+
+
+
+        //Debugging Controls
         if(window.getKeyState(GLFW.GLFW_KEY_1)) {
             currentImage = gBufferObject.gPosition
         }else if(window.getKeyState(GLFW.GLFW_KEY_2)) {
@@ -633,22 +781,6 @@ class Scene(private val window: GameWindow) {
         }
 
 
-
-        //Check if player goes through portal
-        if (portal1.checkCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)) {
-            //lightCycle?.setPosition(portal1.portalCam.getWorldPosition().x - 0.35f, portal1.portalCam.getWorldPosition().y, portal1.portalCam.getWorldPosition().z) //Teleports player to the other portal
-            player?.setRotationA(portal1.portalCam.getRotationA())
-            player?.setPosition(portal1.goingOutCoord.x, portal1.goingOutCoord.y, portal1.goingOutCoord.z)
-        }
-        else if (portal2.checkCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)) {
-            //lightCycle?.setPosition(portal2.portalCam.getWorldPosition().x + 0.35f, portal2.portalCam.getWorldPosition().y, portal2.portalCam.getWorldPosition().z) //Teleports player to the other portal
-            player?.setRotationA(portal2.portalCam.getRotationA())
-            player?.setPosition(portal2.goingOutCoord.x, portal2.goingOutCoord.y, portal2.goingOutCoord.z)
-        }
-
-        portal1.setCameraParent(portal2, player)
-        portal2.setCameraParent(portal1, player)
-
     }
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
@@ -668,4 +800,37 @@ class Scene(private val window: GameWindow) {
 
 
     fun cleanup() {}
+
+
+    //Player functions (Why is the player not an object as well? I don't know)
+    fun getLengthdirPoint(x: Float, y: Float, z: Float, length: Float, dir: Float) : Vector3f {
+        val lengthdirx = x + (length * (Math.cos(dir.toDouble()))).toFloat()
+        val lengthdirz = z + (length * (-Math.sin(dir.toDouble()))).toFloat()
+
+        return Vector3f(lengthdirx, y, lengthdirz)
+    }
+
+    fun lengthdir_x(length: Float, dir: Float) : Float {
+        return (length * (Math.cos(dir.toDouble()))).toFloat()
+    }
+
+    fun lengthdir_z(length: Float, dir: Float) : Float {
+        return (length * (-Math.sin(dir.toDouble()))).toFloat()
+    }
+
+
+    //fun to get median
+    fun median(arrayList: ArrayList<Float>) : Float{
+
+        arrayList.sort()
+
+        //Check for even case
+        if (arrayList.size % 2 != 0) {
+            return arrayList.get(arrayList.size / 2)
+        }
+
+        //return (double)(a[(n - 1) / 2] + a[n / 2]) / 2.0;
+        return (arrayList.get((arrayList.size-1) / 2) + arrayList.get(arrayList.size / 2)) / 2.0f
+
+    }
 }
