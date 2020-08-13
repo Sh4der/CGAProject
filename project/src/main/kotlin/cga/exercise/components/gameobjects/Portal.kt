@@ -36,7 +36,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     val portalWall : Renderable
     val portalCam : Renderable
     val portalFrame : Renderable?
-    private val camera : TronCamera
+    val camera : TronCamera
     private var collisionBox3Dp1 : Vector3f //part1
     private var collisionBox3Dp2 : Vector3f //part2
     private var collisionAlmostBox3Dp1 : Vector3f //part1
@@ -75,8 +75,8 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
         portalCam = Renderable(mutableListOf(meshPortalWallCam)) //For visualizing the camera for each portal
         portalCam.meshes[0].material?.emitColor = Vector3f(frameColor)
-        portalCam.scaleLocal(Vector3f(1f))
-        portalCam.rotateLocal(0f, roty, 0f)
+        //portalCam.scaleLocal(Vector3f(1f))
+        //portalCam.rotateLocal(0f, roty, 0f)
 
         //Load in Portal Frame
         /*val resPortalFrame : OBJLoader.OBJResult = OBJLoader.loadOBJ("assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj")
@@ -103,7 +103,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         //Define camera
         camera = TronCamera()
         //camera.rotateLocal(0f,-90f,0f)
-        camera.translateLocal(Vector3f(0f,2f,0f))
+        camera.translateLocal(Vector3f(0f,0f,0f))
         //camera.translateGlobal(Vector3f(0f))
 
         //Create Collisionbox
@@ -153,8 +153,8 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
             // Camera rotation
             val camdir = (c.getYDirDeg() + (p.roty - roty) + (180f * rangecheck.toFloat())).toFloat()
-            camera.setModelMatrix(Matrix4f())//setRotation(0f,camdir,0f)
-            camera.rotateLocal(0f,camdir+270,0f)
+            portalCam.setModelMatrix(Matrix4f())//setRotation(0f,camdir,0f)
+            portalCam.rotateLocal(0f,camdir+270,0f)
 
             val checkdir = ((p.roty - roty) + (180 * rangecheck)).toInt()
 
@@ -185,28 +185,28 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
                 val setx = playerWorldPos.x - portalWall.getWorldPosition().x + pWorldPos.x + camOffsetx
                 val setz = playerWorldPos.z - portalWall.getWorldPosition().z + pWorldPos.z + camOffsetz
                 val sety = playerWorldPos.y + pWorldPos.y - portalWall.getWorldPosition().y + 2f
-                camera.setPosition(setx, sety, setz)
+                portalCam.setPosition(setx, sety, setz)
             }
 
             if (checkdir == 180 || checkdir == -180) {
                 val setx = -(playerWorldPos.x - portalWall.getWorldPosition().x) + pWorldPos.x + camOffsetx
                 val setz = -(playerWorldPos.z - portalWall.getWorldPosition().z) + pWorldPos.z + camOffsetz
                 val sety = playerWorldPos.y + pWorldPos.y - portalWall.getWorldPosition().y + 2f
-                camera.setPosition(setx, sety, setz)
+                portalCam.setPosition(setx, sety, setz)
             }
 
             if (checkdir == 90 || checkdir == -270 || checkdir == 450) {
                 val setz = -(playerWorldPos.x - portalWall.getWorldPosition().x) + pWorldPos.z + camOffsetz
                 val setx = playerWorldPos.z - portalWall.getWorldPosition().z + pWorldPos.x + camOffsetx
                 val sety = playerWorldPos.y + pWorldPos.y - portalWall.getWorldPosition().y + 2f
-                camera.setPosition(setx, sety, setz)
+                portalCam.setPosition(setx, sety, setz)
             }
 
             if (checkdir == -90 || checkdir == 270 || checkdir == -450) {
                 val setz = playerWorldPos.x - portalWall.getWorldPosition().x + pWorldPos.z + camOffsetz
                 val setx = -(playerWorldPos.z - portalWall.getWorldPosition().z) + pWorldPos.x + camOffsetx
                 val sety = playerWorldPos.y + pWorldPos.y - portalWall.getWorldPosition().y + 2f
-                camera.setPosition(setx, sety, setz)
+                portalCam.setPosition(setx, sety, setz)
             }
 
             // Set the coordinates to where the player should get out
@@ -236,8 +236,6 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
                 collisionAlmostBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.8f)
             }
 
-            goingOutCoord = Vector3f(portalCam.getWorldPosition().x, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z)
-
             /*if (p.roty == 0f) {
                 goingOutCoord = Vector3f(portalCam.getWorldPosition().x + 0.45f, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z)
             }
@@ -254,10 +252,16 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
             //camera.setRotationA(c.getRotationA())
             //camera.setPosition(playerWorldPos.x + pWorldPos.x - portalWall.getWorldPosition().x, playerWorldPos.y + pWorldPos.y - portalWall.getWorldPosition().y+2f, playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
 
-            //Needed to transition the player from portal a to portal b
-            portalCam.setRotationA(camera.getRotationA())
-            portalCam.scaleLocal(Vector3f(0.1f))
-            portalCam.setPosition(camera.getWorldPosition().x, camera.getWorldPosition().y-2f, camera.getWorldPosition().z)
+            //Needed to transition the player from portal a to portal b ////CHANGED
+            //portalCam.setRotationA(camera.getRotationA())
+            //portalCam.scaleLocal(Vector3f(0.1f))
+            //portalCam.setPosition(camera.getWorldPosition().x, camera.getWorldPosition().y-2f, camera.getWorldPosition().z)
+            //camera.parent = portalCam
+            //camera.setRotationA(portalCam.getRotationA())
+            camera.parent = portalCam
+            //camera.setPosition(portalCam.getWorldPosition().x, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z)
+
+            goingOutCoord = Vector3f(portalCam.getWorldPosition().x, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z)
 
             //Debugging
             //println(portalCam.getWorldPosition() == camera.getWorldPosition())

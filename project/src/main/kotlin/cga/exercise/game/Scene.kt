@@ -819,14 +819,14 @@ class Scene(private val window: GameWindow) {
         if (portal1.checkCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)) {
             //lightCycle?.setPosition(portal1.portalCam.getWorldPosition().x - 0.35f, portal1.portalCam.getWorldPosition().y, portal1.portalCam.getWorldPosition().z) //Teleports player to the other portal
             player?.setRotationA(portal1.portalCam.getRotationA())
-            player?.setPosition(portal1.goingOutCoord.x, portal1.goingOutCoord.y, portal1.goingOutCoord.z)
+            player?.setPosition(portal1.goingOutCoord.x, portal1.goingOutCoord.y-2f, portal1.goingOutCoord.z)
             //hspeed = 0f
             //vspeed = 0f
         }
         else if (portal2.checkCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)) {
             //lightCycle?.setPosition(portal2.portalCam.getWorldPosition().x + 0.35f, portal2.portalCam.getWorldPosition().y, portal2.portalCam.getWorldPosition().z) //Teleports player to the other portal
             player?.setRotationA(portal2.portalCam.getRotationA())
-            player?.setPosition(portal2.goingOutCoord.x, portal2.goingOutCoord.y, portal2.goingOutCoord.z)
+            player?.setPosition(portal2.goingOutCoord.x, portal2.goingOutCoord.y-2f, portal2.goingOutCoord.z)
             //hspeed = 0f
             //vspeed = 0f
         }
@@ -880,18 +880,30 @@ class Scene(private val window: GameWindow) {
 
     fun onKey(key: Int, scancode: Int, action: Int, mode: Int) {}
 
-    var oldMousePosX = 0.0
-    var oldMousePosY = 0.0
+    var lastX = 0.0
+    var lastY = 0.0
 
     fun onMouseMove(xpos: Double, ypos: Double) {
 
         //cam.rotateAroundPoint((oldMousePosY-ypos).toFloat() * 0.002f, (oldMousePosX - xpos).toFloat() * 0.002f, 0f, Vector3f(0f))
         //cam.rotateAroundPoint(0f, (oldMousePosX - xpos).toFloat() * 0.02f, 0f, Vector3f(0f))
-        player?.rotateLocal(0f, (oldMousePosX - xpos).toFloat() * 0.02f, 0f)
-        //cam.rotateLocal((oldMousePosY - ypos).toFloat() * 0.02f, 0f, 0f)
+        player?.rotateLocal(0f, (lastX - xpos).toFloat() * 0.02f, 0f)
+        cam.rotateLocal((lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+        portal1.camera.rotateLocal((lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+        portal2.camera.rotateLocal((lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+        if (cam.getXDirDeg() > 180f) {
+            cam.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+        }
+        else if (cam.getXDir() < 0f) {
+            cam.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+        }
 
-        oldMousePosX = xpos
-        oldMousePosY = ypos
+        lastX = xpos
+        lastY = ypos
     }
 
 

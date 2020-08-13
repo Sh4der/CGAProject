@@ -97,9 +97,17 @@ open class Transformable : ITransformable {
         model_matrix.setTranslation(x,y,z)
     }
 
+    fun getXDir() = atan2(model_matrix.m11().toDouble(), model_matrix.m12().toDouble())
+
     fun getYDir() = atan2(model_matrix.m00().toDouble(), model_matrix.m02().toDouble())
 
+    fun getZDir() = Math.asin(model_matrix.m01()).toDouble()
+
+    fun getXDirDeg() = (if (getXDir() > 0) getXDir() else 2 * Math.PI + getXDir()) * 360 / (2 * Math.PI)
+
     fun getYDirDeg() = (if (getYDir() > 0) getYDir() else 2 * Math.PI + getYDir()) * 360 / (2 * Math.PI)
+
+    fun getZDirDeg() = toDegrees(getZDir())//(if (getZDir() > 0) getZDir() else 2 * Math.PI + getZDir()) * 360 / (2 * Math.PI)
 
 
     fun getRotationA() : AxisAngle4f {
