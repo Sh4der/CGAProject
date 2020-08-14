@@ -75,16 +75,8 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
         portalCam = Renderable(mutableListOf(meshPortalWallCam)) //For visualizing the camera for each portal
         portalCam.meshes[0].material?.emitColor = Vector3f(frameColor)
-        //portalCam.scaleLocal(Vector3f(1f))
-        //portalCam.rotateLocal(0f, roty, 0f)
 
         //Load in Portal Frame
-        /*val resPortalFrame : OBJLoader.OBJResult = OBJLoader.loadOBJ("assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj")
-        val portalFrameMesh: OBJLoader.OBJMesh = resPortalFrame.objects[0].meshes[0]
-        val meshPortalFrame = Mesh(portalWallMesh.vertexData, portalFrameMesh.indexData, vertexAttributes, portalMaterialCam)
-
-        portalFrame = Renderable(mutableListOf(meshPortalFrame))*/
-        //portalFrame = ModelLoader.loadModel("assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
         portalFrame = ModelLoader.loadModel("assets/models/portal/portal_frame_flat.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
         portalFrame?.meshes?.get(0)?.material?.emitColor = frameColor
         portalFrame?.meshes?.get(0)?.material?.diff = Texture2D("assets/textures/ground_diff.png", false)
@@ -214,53 +206,30 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
             if (roty == 0f) {
                 collisionBox3Dp1 = Vector3f(x-0.3f, y-3f, z-1.5f)
                 collisionBox3Dp2 = Vector3f(x+0.3f, y+3f, z+1.5f)
-                collisionAlmostBox3Dp1 = Vector3f(x-0.8f, y-3f, z-1.5f)
-                collisionAlmostBox3Dp2 = Vector3f(x+0.8f, y+3f, z+1.5f)
+                collisionAlmostBox3Dp1 = Vector3f(x-1f, y-3f, z-1.5f)
+                collisionAlmostBox3Dp2 = Vector3f(x+1f, y+3f, z+1.5f)
             }
             else if (roty == 180f) {
                 collisionBox3Dp1 = Vector3f(x-0.3f, y-3f, z-1.5f)
                 collisionBox3Dp2 = Vector3f(x+0.3f, y+3f, z+1.5f)
-                collisionAlmostBox3Dp1 = Vector3f(x-0.8f, y-3f, z-1.5f)
-                collisionAlmostBox3Dp2 = Vector3f(x+0.8f, y+3f, z+1.5f)
+                collisionAlmostBox3Dp1 = Vector3f(x-1f, y-3f, z-1.5f)
+                collisionAlmostBox3Dp2 = Vector3f(x+1f, y+3f, z+1.5f)
             }
             else if (roty == 270f) {
                 collisionBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.3f)
                 collisionBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.3f)
-                collisionAlmostBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.8f)
-                collisionAlmostBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.8f)
+                collisionAlmostBox3Dp1 = Vector3f(x-1.5f, y-3f, z-1f)
+                collisionAlmostBox3Dp2 = Vector3f(x+1.5f, y+3f, z+1f)
             }
             else if (roty == 90f) {
                 collisionBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.3f)
                 collisionBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.3f)
-                collisionAlmostBox3Dp1 = Vector3f(x-1.5f, y-3f, z-0.8f)
-                collisionAlmostBox3Dp2 = Vector3f(x+1.5f, y+3f, z+0.8f)
+                collisionAlmostBox3Dp1 = Vector3f(x-1.5f, y-3f, z-1f)
+                collisionAlmostBox3Dp2 = Vector3f(x+1.5f, y+3f, z+1f)
             }
 
-            /*if (p.roty == 0f) {
-                goingOutCoord = Vector3f(portalCam.getWorldPosition().x + 0.45f, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z)
-            }
-            else if (p.roty == 180f) {
-                goingOutCoord = Vector3f(portalCam.getWorldPosition().x - 0.45f, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z)
-            }
-            else if (p.roty == 270f) {
-                goingOutCoord = Vector3f(portalCam.getWorldPosition().x, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z + 0.45f)
-            }
-            else if (p.roty == 90f) {
-                goingOutCoord = Vector3f(portalCam.getWorldPosition().x, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z - 0.45f)
-            }*/
 
-            //camera.setRotationA(c.getRotationA())
-            //camera.setPosition(playerWorldPos.x + pWorldPos.x - portalWall.getWorldPosition().x, playerWorldPos.y + pWorldPos.y - portalWall.getWorldPosition().y+2f, playerWorldPos.z + pWorldPos.z - portalWall.getWorldPosition().z)
-
-            //Needed to transition the player from portal a to portal b ////CHANGED
-            //portalCam.setRotationA(camera.getRotationA())
-            //portalCam.scaleLocal(Vector3f(0.1f))
-            //portalCam.setPosition(camera.getWorldPosition().x, camera.getWorldPosition().y-2f, camera.getWorldPosition().z)
-            //camera.parent = portalCam
-            //camera.setRotationA(portalCam.getRotationA())
             camera.parent = portalCam
-            //camera.setPosition(portalCam.getWorldPosition().x, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z)
-
             goingOutCoord = Vector3f(portalCam.getWorldPosition().x, portalCam.getWorldPosition().y, portalCam.getWorldPosition().z)
 
             //Debugging
@@ -339,6 +308,29 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         )
 
         return distance
+    }
+
+    fun setPositionRotation(pos: Vector4f) {
+        x = pos.x
+        y = Math.max(3f,pos.y)
+        z = pos.z
+
+        roty = pos.w
+
+        //Portal & Frame transformation
+        portalWall.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))
+        portalWall.setPosition(x,y,z)
+        portalWall.translateLocal(Vector3f(-0.21f,0f,0f))
+        portalWall.scaleLocal(Vector3f(1.18f, 0.81f, 0.81f))
+
+        portalFrame?.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))
+        portalFrame?.setPosition(x,y,z)
+        portalFrame?.translateLocal(Vector3f(-0.21f,0f,0f))
+        portalFrame?.scaleLocal(Vector3f(0.8f, 0.8f, 0.8f))
+
+        x = portalWall.x()
+        y = portalWall.y()
+        z = portalWall.z()
     }
 
 }

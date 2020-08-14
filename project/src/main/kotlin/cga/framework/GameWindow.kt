@@ -189,6 +189,10 @@ abstract class GameWindow(
         return GLFW.glfwGetKey(m_window, key) == GLFW.GLFW_PRESS
     }
 
+    fun getMouseKeyState(key: Int): Boolean {
+        return GLFW.glfwGetMouseButton(m_window, key) == GLFW.GLFW_PRESS
+    }
+
     /**
      * Toggles cursor capture mode
      * @param visible if false, the cursor becomes invisible and is captured by the window.

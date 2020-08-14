@@ -26,6 +26,16 @@ class CollisionPool {
         return false
     }
 
+    // Checks point collision with every collision entity
+    fun checkPointCollisionEntity(check_x: Float, check_y: Float, check_z: Float) : Collision {
+
+        for (c in collisionPool) {
+            if (c.checkPointCollision(check_x, check_y, check_z)) { return c }
+        }
+
+        return Collision(0f,0f,0f,0f,0f,0f)
+    }
+
     fun checkRectangleCollision(col: Collision) : Boolean {
         var check = false
         for (c in collisionPool) {

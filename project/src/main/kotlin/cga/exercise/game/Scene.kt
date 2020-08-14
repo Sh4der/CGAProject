@@ -7,6 +7,7 @@ import cga.exercise.components.framebuffer.SSAOTextureFramebuffer
 import cga.exercise.components.gameobjects.Collision
 import cga.exercise.components.gameobjects.CollisionPool
 import cga.exercise.components.gameobjects.Portal
+import cga.exercise.components.gameobjects.Raycast
 import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
 import cga.exercise.components.geometry.Renderable
@@ -48,9 +49,14 @@ class Scene(private val window: GameWindow) {
     private var testLevel : Renderable?
 
     private var player : Renderable?
+    private var portalGun : Renderable?
+    private var portalGunPortal1 : Renderable?
+    private var portalGunPortal2 : Renderable?
 
     private var pointLight : PointLight
     private var spotLight : SpotLight
+    private var spotLightPortal1 : SpotLight
+    private var spotLightPortal2 : SpotLight
 
     private val screenQuadMesh : Mesh
 
@@ -129,6 +135,25 @@ class Scene(private val window: GameWindow) {
         player?.scaleLocal(Vector3f(1f))
         player?.setPosition(-5f,0f,8f)
 
+        //Load in portal gun
+        portalGun = ModelLoader.loadModel("assets/models/Portal Gun/Portal Gun.obj", 0f,0f,0f)
+        portalGun?.scaleLocal(Vector3f(0.4f))
+        portalGun?.translateLocal(Vector3f(1.2f,-1f,-1f))
+        portalGun?.rotateLocal(0f,-35f,0f)
+
+        //Load in portal gun for portal1
+        portalGunPortal1 = ModelLoader.loadModel("assets/models/Portal Gun/Portal Gun.obj", 0f,0f,0f)
+        portalGunPortal1?.scaleLocal(Vector3f(0.4f))
+        portalGunPortal1?.translateLocal(Vector3f(1.2f,-1f,-1f))
+        portalGunPortal1?.rotateLocal(0f,-35f,0f)
+
+        //Load in portal gun for portal1
+        portalGunPortal2 = ModelLoader.loadModel("assets/models/Portal Gun/Portal Gun.obj", 0f,0f,0f)
+        portalGunPortal2?.scaleLocal(Vector3f(0.4f))
+        portalGunPortal2?.translateLocal(Vector3f(1.2f,-1f,-1f))
+        portalGunPortal2?.rotateLocal(0f,-35f,0f)
+
+
 
         val diffTex = Texture2D("assets/textures/con_wall_1.png", true)
         diffTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST)
@@ -164,6 +189,7 @@ class Scene(private val window: GameWindow) {
         cam.rotateLocal(0f, 0f, 0f)
         cam.translateLocal(Vector3f(0f, 2f, 0f))
         cam.parent = player!!
+        portalGun?.parent = cam
 
         camOverview = TronCamera()
         camOverview.rotateLocal(-45f, 0f, 0f)
@@ -188,6 +214,8 @@ class Scene(private val window: GameWindow) {
 
 
         spotLight = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
+        spotLightPortal1 = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
+        spotLightPortal2 = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
 
         spotLight.parent = player
         lightPool.add(spotLight)
@@ -282,7 +310,7 @@ class Scene(private val window: GameWindow) {
         //Add collisions
         collisionPool.addCollision(-10f-2f,-1f,10f-2f,-10f+2f,3f,10f+2f)
         collisionPool.addCollision(-22f,0f,-1f,22f,22f,0f)
-        collisionPool.addCollision(8f,0f,-22f,8f,22f,22f)
+        collisionPool.addCollision(8f,0f,-22f,10f,22f,22f)
         //Add collision from a 3d model
         collisionPool.addCollisionFromObject("assets/models/test_level_empty_notex.obj", Vector3f(0f))
 
@@ -381,6 +409,10 @@ class Scene(private val window: GameWindow) {
 
         portal1.setCameraParent(portal2, player, cam)
         portal2.setCameraParent(portal1, player, cam)
+        portalGunPortal1?.parent = portal1.camera
+        portalGunPortal2?.parent = portal2.camera
+        spotLightPortal1.parent = portal1.camera
+        spotLightPortal2.parent = portal2.camera
 
         //Render Texture from portal cameras
         //portal1.generateTexture()
@@ -391,10 +423,13 @@ class Scene(private val window: GameWindow) {
         portal1.bindPortalCamera(gBufferShader); GLError.checkThrow()
         //ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
+        //portalGun?.render(gBufferShader); GLError.checkThrow()
         rob?.render(gBufferShader)
         wall.render(gBufferShader)
         wall2.render(gBufferShader)
         testLevel?.render(gBufferShader)
+        portalGunPortal1?.render(gBufferShader)
+        //portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
         //portal2.renderFrameOnly(gBufferShader)
@@ -447,10 +482,13 @@ class Scene(private val window: GameWindow) {
         portal2.bindPortalCamera(gBufferShader); GLError.checkThrow()
         //ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
+        //portalGun?.render(gBufferShader); GLError.checkThrow()
         rob?.render(gBufferShader)
         wall.render(gBufferShader)
         wall2.render(gBufferShader)
         testLevel?.render(gBufferShader)
+        //portalGunPortal1?.render(gBufferShader)
+        portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         //portal1.renderFrameOnly(gBufferShader)
         portal2.render(gBufferShader)
@@ -548,6 +586,7 @@ class Scene(private val window: GameWindow) {
         cam.bind(gBufferShader); GLError.checkThrow()
         //ground.render(gBufferShader); GLError.checkThrow()
         //player?.render(gBufferShader); GLError.checkThrow()
+        portalGun?.render(gBufferShader); GLError.checkThrow()
         rob?.render(gBufferShader)
         //if (!(portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
             wall.render(gBufferShader)
@@ -638,8 +677,8 @@ class Scene(private val window: GameWindow) {
     val jumpspeed = 0.2f
     val terminalvelocity = 0.3f
 
-    var ytop = player!!.y() + yheight //Probabily unused, because it is in the getPlayerCollision() function
-    var ybottom = player!!.y() //Probabily unused, because it is in the getPlayerCollision() function
+    var ytop = player!!.y() + yheight //Unused, because it is in the getPlayerCollision() function
+    var ybottom = player!!.y() //Unused, because it is in the getPlayerCollision() function
 
     fun update(dt: Float, t: Float) {
 
@@ -755,13 +794,29 @@ class Scene(private val window: GameWindow) {
         }
 
 
+        //Shoot portal
+        if (window.getMouseKeyState(GLFW.GLFW_MOUSE_BUTTON_1)) {
+            val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
+            val collisionPos = raycast.moveUntilCollision(collisionPool)
+            if (collisionPos != Vector3f(0f)) {
+                portal1.setPositionRotation(collisionPos)
+            }
+        }
+
+        if (window.getMouseKeyState(GLFW.GLFW_MOUSE_BUTTON_2)) {
+            val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
+            val collisionPos = raycast.moveUntilCollision(collisionPool)
+            if (collisionPos != Vector3f(0f)) {
+                portal2.setPositionRotation(collisionPos)
+            }
+        }
 
 
 
 
         //END STEP
-        var ytop = player!!.y() + yheight
-        var ybottom = player!!.y()
+        ytop = player!!.y() + yheight
+        ybottom = player!!.y()
 
         /*
         // OLD MOVEMENT CODE

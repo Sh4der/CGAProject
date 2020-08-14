@@ -18,6 +18,10 @@ open class Transformable : ITransformable {
         model_matrix.rotateXYZ(Math.toRadians(pitch), Math.toRadians(yaw), Math.toRadians(roll))
     }
 
+    fun rotateLocalRad(pitch: Float, yaw: Float, roll: Float) {
+        model_matrix.rotateXYZ(pitch, yaw, roll)
+    }
+
     override fun rotateAroundPoint(pitch: Float, yaw: Float, roll: Float, altMidpoint: Vector3f) {
         val vec = Vector3f(altMidpoint)
 

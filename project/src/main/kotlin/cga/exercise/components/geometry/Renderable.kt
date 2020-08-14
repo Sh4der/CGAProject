@@ -2,7 +2,7 @@ package cga.exercise.components.geometry
 
 import cga.exercise.components.shader.ShaderProgram
 
-class Renderable(val meshes : MutableList<Mesh>) : Transformable(), IRenderable{
+class Renderable(val meshes : MutableList<Mesh>) : Transformable(), IRenderable {
 
 
     fun x() = this.getWorldPosition().x
