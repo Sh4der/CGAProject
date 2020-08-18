@@ -325,7 +325,7 @@ class Scene(private val window: GameWindow) {
 
 
         //Add collisions
-        collisionPool.addCollision(-10f-2f,-1f,10f-2f,-10f+2f,3f,10f+2f)
+        //collisionPool.addCollision(-10f-2f,-1f,10f-2f,-10f+2f,3f,10f+2f)
         //collisionPool.addCollision(-22f,0f,-1f,22f,22f,0f)
         //collisionPool.addCollision(8f,0f,-22f,10f,22f,22f)
         //Add collision from a 3d model
