@@ -16,7 +16,7 @@ class Raycast(var x: Float, var y: Float, var z: Float, val mm: Matrix4f) : Tran
 
         this.setModelMatrix(mm)
 
-        for (i in 0 .. 40000) {
+        for (i in 0 .. 100000) {
             /*
             x += xdir*speed
             y += ydir*speed
