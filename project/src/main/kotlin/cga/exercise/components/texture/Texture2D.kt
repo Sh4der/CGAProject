@@ -17,6 +17,7 @@ import java.nio.ByteBuffer
 class Texture2D: ITexture{
     var texID: Int = -1
         private set
+    var texturePath = ""
 
     constructor(imageData: ByteBuffer?, width: Int, height: Int, genMipMaps: Boolean) : this(imageData, width, height, genMipMaps, GL11.GL_RGBA8, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE)
 

@@ -91,7 +91,7 @@ class Scene(private val window: GameWindow) {
 
 
 
-    //Collsions
+    //Collisions
     private val collisionPool = CollisionPool()
 
     //scene setup
@@ -167,6 +167,13 @@ class Scene(private val window: GameWindow) {
                 specTex,
                 50f,
                 Vector2f(64.0f, 64.0f)); GLError.checkThrow()
+
+        val diffTexMetal1 = Texture2D("assets/textures/metal_floor.png", true)
+        diffTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST)
+        val emitTexMetal1 = Texture2D("assets/textures/con_wall_1_emit.png", true)
+        emitTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
+        val specTexMetal1 = Texture2D("assets/textures/metal_floor.png", true)
+        specTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 
 
         //load an object and create a mesh
@@ -277,11 +284,11 @@ class Scene(private val window: GameWindow) {
         rob?.meshes?.get(0)?.material?.specular = specTex
         rob?.meshes?.get(0)?.material?.diff = diffTex
 
-        testLevel = ModelLoader.loadModel("assets/models/test_level_empty_notex.obj", 0f, 0f, 0f)
-        testLevel?.meshes?.get(0)?.material?.emit = emitTex
-        testLevel?.meshes?.get(0)?.material?.specular = specTex
-        testLevel?.meshes?.get(0)?.material?.diff = diffTex
-        testLevel?.meshes?.get(0)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
+        testLevel = ModelLoader.loadModel("assets/models/test_level_empty_notex2.obj", 0f, 0f, 0f)
+        testLevel?.meshes?.get(0)?.material?.emit = emitTexMetal1
+        testLevel?.meshes?.get(0)?.material?.specular = specTexMetal1
+        testLevel?.meshes?.get(0)?.material?.diff = diffTexMetal1
+        testLevel?.meshes?.get(0)?.material?.tcMultiplier = Vector2f(64f, 64f)
         testLevel?.meshes?.get(0)?.material?.emitColor = Vector3f(1f)
         testLevel?.meshes?.get(1)?.material?.emit = emitTex
         testLevel?.meshes?.get(1)?.material?.specular = specTex
@@ -303,16 +310,26 @@ class Scene(private val window: GameWindow) {
         testLevel?.meshes?.get(4)?.material?.diff = diffTex
         testLevel?.meshes?.get(4)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
         testLevel?.meshes?.get(4)?.material?.emitColor = Vector3f(1f)
+        testLevel?.meshes?.get(5)?.material?.emit = emitTex
+        testLevel?.meshes?.get(5)?.material?.specular = specTex
+        testLevel?.meshes?.get(5)?.material?.diff = diffTex
+        testLevel?.meshes?.get(5)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
+        testLevel?.meshes?.get(5)?.material?.emitColor = Vector3f(1f)
+        testLevel?.meshes?.get(6)?.material?.emit = emitTex
+        testLevel?.meshes?.get(6)?.material?.specular = specTex
+        testLevel?.meshes?.get(6)?.material?.diff = diffTex
+        testLevel?.meshes?.get(6)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
+        testLevel?.meshes?.get(6)?.material?.emitColor = Vector3f(1f)
 
 
 
 
         //Add collisions
         collisionPool.addCollision(-10f-2f,-1f,10f-2f,-10f+2f,3f,10f+2f)
-        collisionPool.addCollision(-22f,0f,-1f,22f,22f,0f)
-        collisionPool.addCollision(8f,0f,-22f,10f,22f,22f)
+        //collisionPool.addCollision(-22f,0f,-1f,22f,22f,0f)
+        //collisionPool.addCollision(8f,0f,-22f,10f,22f,22f)
         //Add collision from a 3d model
-        collisionPool.addCollisionFromObject("assets/models/test_level_empty_notex.obj", Vector3f(0f))
+        collisionPool.addCollisionFromObject("assets/models/test_level_empty_notex2.obj", Vector3f(0f))
 
     }
 
@@ -413,6 +430,8 @@ class Scene(private val window: GameWindow) {
         portalGunPortal2?.parent = portal2.camera
         spotLightPortal1.parent = portal1.camera
         spotLightPortal2.parent = portal2.camera
+        //portal1.setPositionRotationClamp(player!!)
+        //portal2.setPositionRotationClamp(player!!)
 
         //Render Texture from portal cameras
         //portal1.generateTexture()
@@ -425,9 +444,9 @@ class Scene(private val window: GameWindow) {
         player?.render(gBufferShader); GLError.checkThrow()
         //portalGun?.render(gBufferShader); GLError.checkThrow()
         rob?.render(gBufferShader)
-        wall.render(gBufferShader)
-        wall2.render(gBufferShader)
-        testLevel?.render(gBufferShader)
+        testLevel?.renderWithPortalCheck(gBufferShader, portal2)
+        //wall.render(gBufferShader)
+        //wall2.render(gBufferShader)
         portalGunPortal1?.render(gBufferShader)
         //portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
@@ -483,10 +502,10 @@ class Scene(private val window: GameWindow) {
         //ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
         //portalGun?.render(gBufferShader); GLError.checkThrow()
+        testLevel?.renderWithPortalCheck(gBufferShader, portal1)
         rob?.render(gBufferShader)
-        wall.render(gBufferShader)
-        wall2.render(gBufferShader)
-        testLevel?.render(gBufferShader)
+        //wall.render(gBufferShader)
+        //wall2.render(gBufferShader)
         //portalGunPortal1?.render(gBufferShader)
         portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
@@ -589,10 +608,10 @@ class Scene(private val window: GameWindow) {
         portalGun?.render(gBufferShader); GLError.checkThrow()
         rob?.render(gBufferShader)
         //if (!(portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
-            wall.render(gBufferShader)
+            //wall.render(gBufferShader)
         //}
         //if (!(portal2.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
-            wall2.render(gBufferShader)
+            //wall2.render(gBufferShader)
         //}
         testLevel?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
@@ -794,20 +813,20 @@ class Scene(private val window: GameWindow) {
         }
 
 
-        //Shoot portal
+        //Shoot portals to walls
         if (window.getMouseKeyState(GLFW.GLFW_MOUSE_BUTTON_1)) {
             val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
             val collisionPos = raycast.moveUntilCollision(collisionPool)
-            if (collisionPos != Vector3f(0f)) {
-                portal1.setPositionRotation(collisionPos)
+            if (collisionPos != Vector4f(-9999f)) {
+                portal1.setPositionRotation(collisionPos, collisionPool)
             }
         }
 
         if (window.getMouseKeyState(GLFW.GLFW_MOUSE_BUTTON_2)) {
             val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
             val collisionPos = raycast.moveUntilCollision(collisionPool)
-            if (collisionPos != Vector3f(0f)) {
-                portal2.setPositionRotation(collisionPos)
+            if (collisionPos != Vector4f(-9999f)) {
+                portal2.setPositionRotation(collisionPos, collisionPool)
             }
         }
 

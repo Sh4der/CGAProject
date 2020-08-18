@@ -41,8 +41,11 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     private var collisionBox3Dp2 : Vector3f //part2
     private var collisionAlmostBox3Dp1 : Vector3f //part1
     private var collisionAlmostBox3Dp2 : Vector3f //part2
+    var portalRecCollision : Collision
 
     var goingOutCoord = Vector3f(0f)
+
+    private var initSet = Vector4f(x,y,z,roty)
 
 
     init {
@@ -103,6 +106,9 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         collisionBox3Dp2 = Vector3f(x+0.15f, y+3f, z+2f)
         collisionAlmostBox3Dp1 = Vector3f(x-0.15f, y-3f, z-2f)
         collisionAlmostBox3Dp2 = Vector3f(x+0.15f, y+3f, z+2f)
+
+        //Rectangle Collision
+        portalRecCollision = Collision(x-1f, y-2f, z-1f,x+1f, 0f, z+1f)
     }
 
     // Set Camera Parents is now reworked and does something different.
@@ -310,22 +316,68 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         return distance
     }
 
-    fun setPositionRotation(pos: Vector4f) {
+    fun setPositionRotation(pos: Vector4f, colPool: CollisionPool) {
+        initSet = pos
+
         x = pos.x
         y = Math.max(3f,pos.y)
         z = pos.z
 
         roty = pos.w
 
+        portalRecCollision = Collision(x-1f, y-2f, z-1f,x+1f, 0f, z+1f)
+
+        //Check if portal is maybe inside the floor - DOESNT WORK YET!
+        val colFloor = colPool.checkRectangleCollisionEntity(colPool.checkPointCollisionEntity(x,y,z), portalRecCollision)
+
+        if (colFloor.y2 != 0f && colFloor.y2 < y) {
+            y = colFloor.y2 + 3f
+            println(y)
+        }
+
         //Portal & Frame transformation
         portalWall.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))
         portalWall.setPosition(x,y,z)
-        portalWall.translateLocal(Vector3f(-0.21f,0f,0f))
+        portalWall.translateLocal(Vector3f(-0.234f,0f,0f))
         portalWall.scaleLocal(Vector3f(1.18f, 0.81f, 0.81f))
 
         portalFrame?.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))
         portalFrame?.setPosition(x,y,z)
-        portalFrame?.translateLocal(Vector3f(-0.21f,0f,0f))
+        portalFrame?.translateLocal(Vector3f(-0.234f,0f,0f))
+        portalFrame?.scaleLocal(Vector3f(0.8f, 0.8f, 0.8f))
+
+        x = portalWall.x()
+        y = portalWall.y()
+        z = portalWall.z()
+    }
+
+    //Test function that should help to reduce or eliminate z fighting
+    fun setPositionRotationClamp(player: Renderable) {
+        val pos = initSet
+        x = pos.x
+        y = Math.max(3f,pos.y)
+        z = pos.z
+
+        roty = pos.w
+
+        var clampValueMin = -0.235995f
+        var clampValueMax = -0.235f
+
+        var distanceToPlayer = pointDistance(x,z,player.x(),player.z())
+
+        var clampedDistance = Math.min(clampValueMax,Math.max(distanceToPlayer/1000 + clampValueMin, clampValueMin))
+
+        println(distanceToPlayer/1000)
+
+        //Portal & Frame transformation
+        portalWall.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))
+        portalWall.setPosition(x,y,z)
+        portalWall.translateLocal(Vector3f(clampedDistance,0f,0f))
+        portalWall.scaleLocal(Vector3f(1.18f, 0.81f, 0.81f))
+
+        portalFrame?.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))
+        portalFrame?.setPosition(x,y,z)
+        portalFrame?.translateLocal(Vector3f(clampedDistance,0f,0f))
         portalFrame?.scaleLocal(Vector3f(0.8f, 0.8f, 0.8f))
 
         x = portalWall.x()

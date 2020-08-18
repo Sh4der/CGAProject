@@ -1,7 +1,12 @@
 package cga.exercise.components.gameobjects
 
+import cga.exercise.components.geometry.Material
+import cga.exercise.components.texture.Texture2D
+import cga.framework.GLError
 import cga.framework.ModelLoader
+import org.joml.Vector2f
 import org.joml.Vector3f
+import org.lwjgl.opengl.GL11
 
 class CollisionPool {
 
@@ -37,7 +42,6 @@ class CollisionPool {
     }
 
     fun checkRectangleCollision(col: Collision) : Boolean {
-        var check = false
         for (c in collisionPool) {
             if (!(col.x1 >= c.x2 || c.x1 >= col.x2) &&! (col.y1 >= c.y2 || c.y1 >= col.y2) && !(col.z1 >= c.z2 || c.z1 >= col.z2)) {
                 return true
@@ -46,7 +50,29 @@ class CollisionPool {
         return false
     }
 
+    fun checkRectangleCollisionEntity(currentWall: Collision, col: Collision) : Collision {
+        for (c in collisionPool) {
+            if (!(col.x1 >= c.x2 || c.x1 >= col.x2) &&! (col.y1 >= c.y2 || c.y1 >= col.y2) && !(col.z1 >= c.z2 || c.z1 >= col.z2)) {
+                if (c.getCollisionSide(col.x2 - col.x1, col.y2 - col.y1, col.z2 - col.z1) == 22f) {
+                    if (currentWall != c) {
+                        return c
+                    }
+                }
+            }
+        }
+        return Collision(0f,0f,0f,0f,0f,0f)
+    }
+
     fun addCollisionFromObject(path: String, rot: Vector3f) {
+
+        // Create textures to compare with meshs' current texture and define if a portal can be created on this mesh or not.
+        // Doesn't work at the moment
+        val diffTex = Texture2D("assets/textures/con_wall_1.png", true)
+        diffTex.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_NEAREST, GL11.GL_NEAREST)
+
+        val diffTexMetal1 = Texture2D("assets/textures/metal_floor.png", true)
+        diffTexMetal1.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_NEAREST, GL11.GL_NEAREST)
+
 
         val obj = ModelLoader.loadModel(path, rot.x, rot.y, rot.z)
 
@@ -118,7 +144,13 @@ class CollisionPool {
 
             println(biggest)
 
-            addCollision(lowest.x, lowest.y, lowest.z, biggest.x, biggest.y, biggest.z)
+            var portalable = true
+            /*if (obj?.meshes?.get(0)?.material?.diff) {
+                portalable = false
+                println("#########################")
+            }*/
+            //addCollision(lowest.x, lowest.y, lowest.z, biggest.x, biggest.y, biggest.z)
+            addCollision(Collision(lowest.x, lowest.y, lowest.z, biggest.x, biggest.y, biggest.z, portalable))
 
             meshNumber++
         }
