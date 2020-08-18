@@ -4,10 +4,7 @@ import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.framebuffer.SimpleFramebuffer
 import cga.exercise.components.framebuffer.GeometryFramebuffer
 import cga.exercise.components.framebuffer.SSAOTextureFramebuffer
-import cga.exercise.components.gameobjects.Collision
-import cga.exercise.components.gameobjects.CollisionPool
-import cga.exercise.components.gameobjects.Portal
-import cga.exercise.components.gameobjects.Raycast
+import cga.exercise.components.gameobjects.*
 import cga.exercise.components.geometry.Material
 import cga.exercise.components.geometry.Mesh
 import cga.exercise.components.geometry.Renderable
@@ -49,6 +46,7 @@ class Scene(private val window: GameWindow) {
     private var testLevel : Renderable?
 
     private var player : Renderable?
+    private var animatedPlayer : Animation
     private var portalGun : Renderable?
     private var portalGunPortal1 : Renderable?
     private var portalGunPortal2 : Renderable?
@@ -220,7 +218,7 @@ class Scene(private val window: GameWindow) {
         }
 
 
-        spotLight = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
+        spotLight = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(0, 0, 0), 16.5f, 20.5f)
         spotLightPortal1 = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
         spotLightPortal2 = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
 
@@ -270,11 +268,11 @@ class Scene(private val window: GameWindow) {
 
         //Portal Setup
         /*
-        portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), -5f, 3f, 0.25f, 0f, 270f, 0f)
-        portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 7.75f, 3f, 5f, 0f, 180f, 0f)
-        */
         portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), -5f, 3f, -0.235f, 0f, 270f, 0f)
         portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 8.235f, 3f, 5f, 0f, 180f, 0f)
+        */
+        portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), 999f, 999f, -0.235f, 0f, 270f, 0f)
+        portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 999f, 999f, 5f, 0f, 180f, 0f)
 
 
         rob = ModelLoader.loadModel("assets/models/kugel.obj", 0f, 0f, 0f)
@@ -331,9 +329,18 @@ class Scene(private val window: GameWindow) {
         //Add collision from a 3d model
         collisionPool.addCollisionFromObject("assets/models/test_level_empty_notex2.obj", Vector3f(0f))
 
+
+
+        //Animation test
+        animatedPlayer = Animation("assets/char/char_", 0, 19, 0f, 180f, 0f)
+        animatedPlayer?.setParent(player!!)
+        animatedPlayer?.scaleLocal(Vector3f(0.3f))
+
     }
 
     fun render(dt: Float, t: Float) {
+
+        //println(dt)
 
         //------------------------Lukas---------------------//
 /*
@@ -441,7 +448,8 @@ class Scene(private val window: GameWindow) {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal1.bindPortalCamera(gBufferShader); GLError.checkThrow()
         //ground.render(gBufferShader); GLError.checkThrow()
-        player?.render(gBufferShader); GLError.checkThrow()
+        //player?.render(gBufferShader); GLError.checkThrow()
+        animatedPlayer.render(gBufferShader, dt)
         //portalGun?.render(gBufferShader); GLError.checkThrow()
         //rob?.render(gBufferShader)
         testLevel?.renderWithPortalCheck(gBufferShader, portal2)
@@ -500,7 +508,8 @@ class Scene(private val window: GameWindow) {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal2.bindPortalCamera(gBufferShader); GLError.checkThrow()
         //ground.render(gBufferShader); GLError.checkThrow()
-        player?.render(gBufferShader); GLError.checkThrow()
+        //player?.render(gBufferShader); GLError.checkThrow()
+        animatedPlayer.render(gBufferShader, dt)
         //portalGun?.render(gBufferShader); GLError.checkThrow()
         testLevel?.renderWithPortalCheck(gBufferShader, portal1)
         //rob?.render(gBufferShader)
@@ -606,13 +615,7 @@ class Scene(private val window: GameWindow) {
         //ground.render(gBufferShader); GLError.checkThrow()
         //player?.render(gBufferShader); GLError.checkThrow()
         portalGun?.render(gBufferShader); GLError.checkThrow()
-        //rob?.render(gBufferShader)
-        //if (!(portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
-            //wall.render(gBufferShader)
-        //}
-        //if (!(portal2.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
-            //wall2.render(gBufferShader)
-        //}
+        //animatedPlayer.render(gBufferShader)
         testLevel?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
@@ -672,6 +675,12 @@ class Scene(private val window: GameWindow) {
 
 
     }
+
+
+
+
+
+
 
     private var deltaF = 0f;
     private var deltaC = 0f;
@@ -811,6 +820,11 @@ class Scene(private val window: GameWindow) {
                 yspeed = 8f
             }
         }
+
+
+        //Animation
+        animatedPlayer.movement = (hspeed != 0f && vspeed != 0f)
+        animatedPlayer.update()
 
 
         //Shoot portals to walls
