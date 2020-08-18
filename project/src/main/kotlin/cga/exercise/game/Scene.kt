@@ -443,7 +443,7 @@ class Scene(private val window: GameWindow) {
         //ground.render(gBufferShader); GLError.checkThrow()
         player?.render(gBufferShader); GLError.checkThrow()
         //portalGun?.render(gBufferShader); GLError.checkThrow()
-        rob?.render(gBufferShader)
+        //rob?.render(gBufferShader)
         testLevel?.renderWithPortalCheck(gBufferShader, portal2)
         //wall.render(gBufferShader)
         //wall2.render(gBufferShader)
@@ -503,7 +503,7 @@ class Scene(private val window: GameWindow) {
         player?.render(gBufferShader); GLError.checkThrow()
         //portalGun?.render(gBufferShader); GLError.checkThrow()
         testLevel?.renderWithPortalCheck(gBufferShader, portal1)
-        rob?.render(gBufferShader)
+        //rob?.render(gBufferShader)
         //wall.render(gBufferShader)
         //wall2.render(gBufferShader)
         //portalGunPortal1?.render(gBufferShader)
@@ -606,7 +606,7 @@ class Scene(private val window: GameWindow) {
         //ground.render(gBufferShader); GLError.checkThrow()
         //player?.render(gBufferShader); GLError.checkThrow()
         portalGun?.render(gBufferShader); GLError.checkThrow()
-        rob?.render(gBufferShader)
+        //rob?.render(gBufferShader)
         //if (!(portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
             //wall.render(gBufferShader)
         //}
