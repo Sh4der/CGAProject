@@ -80,4 +80,10 @@ class Renderable(val meshes : MutableList<Mesh>) : Transformable(), IRenderable 
 
     }
 
+    fun setMaterial(mat: Material) {
+        meshes.forEach {mesh ->
+            mesh.material = mat
+        }
+    }
+
 }

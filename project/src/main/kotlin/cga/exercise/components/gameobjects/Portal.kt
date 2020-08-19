@@ -323,6 +323,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     }
 
     fun setPositionRotation(pos: Vector4f, colPool: CollisionPool, level: Renderable?) {
+
         initSet = pos
 
         x = pos.x
