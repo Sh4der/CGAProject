@@ -280,6 +280,12 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         //portalCam.render(shaderProgram) //This is not a camera, but rather a 3d object that shows the position and rotation of the camera. Used for debugging.
     }
 
+    fun renderWithPortalCheck(shaderProgram: ShaderProgram, otherPortal: Portal) {
+        if (pointDistance(this.x, this.y, otherPortal.x, otherPortal.y) >= 1.5f) {
+            render(shaderProgram)
+        }
+    }
+
     fun renderFrameOnly(shaderProgram: ShaderProgram) {
         shaderProgram.use()
 

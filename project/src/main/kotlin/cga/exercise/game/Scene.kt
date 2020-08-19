@@ -282,11 +282,11 @@ class Scene(private val window: GameWindow) {
         rob?.meshes?.get(0)?.material?.specular = specTex
         rob?.meshes?.get(0)?.material?.diff = diffTex
 
-        testLevel = ModelLoader.loadModel("assets/models/test_level_empty_notex2.obj", 0f, 0f, 0f)
-        //testLevel?.setEmitColor(Vector3f(1f,1f,1f))
-        testLevel?.meshes?.get(0)?.material?.emit = emitTexMetal1
-        testLevel?.meshes?.get(0)?.material?.specular = specTexMetal1
-        testLevel?.meshes?.get(0)?.material?.diff = diffTexMetal1
+        testLevel = ModelLoader.loadModel("assets/models/test_level2.obj", 0f, 0f, 0f)
+        //testLevel?.setEmitColor(Vector3f(1f))
+        testLevel?.meshes?.get(0)?.material?.emit = emitTex
+        testLevel?.meshes?.get(0)?.material?.specular = specTex
+        testLevel?.meshes?.get(0)?.material?.diff = diffTex
         testLevel?.meshes?.get(0)?.material?.tcMultiplier = Vector2f(64f, 64f)
         testLevel?.meshes?.get(1)?.material?.emit = emitTex
         testLevel?.meshes?.get(1)?.material?.specular = specTex
@@ -321,7 +321,7 @@ class Scene(private val window: GameWindow) {
         //collisionPool.addCollision(-22f,0f,-1f,22f,22f,0f)
         //collisionPool.addCollision(8f,0f,-22f,10f,22f,22f)
         //Add collision from a 3d model
-        collisionPool.addCollisionFromObject("assets/models/test_level_empty_notex2.obj", Vector3f(0f))
+        collisionPool.addCollisionFromObject("assets/models/test_level2.obj", Vector3f(0f))
 
 
 
@@ -457,7 +457,7 @@ class Scene(private val window: GameWindow) {
         portalGunPortal1?.render(gBufferShader)
         //portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
-        portal1.render(gBufferShader)
+        portal1.renderWithPortalCheck(gBufferShader, portal2)
         //portal2.renderFrameOnly(gBufferShader)
         glEnable(GL_CULL_FACE)
         gBufferObjectPortal1.stopRender()
@@ -518,7 +518,7 @@ class Scene(private val window: GameWindow) {
         portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         //portal1.renderFrameOnly(gBufferShader)
-        portal2.render(gBufferShader)
+        portal2.renderWithPortalCheck(gBufferShader, portal1)
         glEnable(GL_CULL_FACE)
         gBufferObjectPortal2.stopRender()
 
