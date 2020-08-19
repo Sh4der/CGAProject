@@ -359,7 +359,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         z = portalWall.z()
     }
 
-    //Test function that should help to reduce or eliminate z fighting
+    //function that should help reduce or eliminate z fighting
     fun setPositionRotationClamp(player: Renderable) {
         val pos = initSet
         x = pos.x
@@ -391,6 +391,20 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         x = portalWall.x()
         y = portalWall.y()
         z = portalWall.z()
+    }
+
+    // For portal in portal rendering, so z-fighting doesnt happen
+    fun setToInitPos() {
+        //Portal & Frame transformation
+        portalWall.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))
+        portalWall.setPosition(initSet.x,initSet.y,initSet.z)
+        portalWall.translateLocal(Vector3f(-0.234f,0f,0f))
+        portalWall.scaleLocal(Vector3f(1.18f, 0.81f, 0.81f))
+
+        portalFrame?.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))
+        portalFrame?.setPosition(initSet.x,initSet.y,initSet.z)
+        portalFrame?.translateLocal(Vector3f(-0.234f,0f,0f))
+        portalFrame?.scaleLocal(Vector3f(0.8f, 0.8f, 0.8f))
     }
 
 }

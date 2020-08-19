@@ -432,11 +432,8 @@ class Scene(private val window: GameWindow) {
         spotLightPortal1.parent = portal1.camera
         spotLightPortal2.parent = portal2.camera
 
-        //TEST
-        //val getWallThatCollidesWithPortal = collisionPool.checkPointCollisionEntity(portal1.portalWall.x(),portal1.portalWall.y(),portal1.portalWall.z())
-        //println(getWallThatCollidesWithPortal)
-        //testLevel?.compareCollisionBox(getWallThatCollidesWithPortal)
-
+        portal1.setToInitPos()
+        portal2.setToInitPos()
 
 
         //Render Texture from portal cameras
@@ -609,6 +606,12 @@ class Scene(private val window: GameWindow) {
         portal2.render(portalShader)
         glEnable(GL_CULL_FACE); GLError.checkThrow()*/
 
+
+
+        //Normal to screen rendering
+        portal1.setPositionRotationClamp(player!!)
+        portal2.setPositionRotationClamp(player!!)
+
         gBufferObject.startRender(gBufferShader)
         cam.bind(gBufferShader); GLError.checkThrow()
         //ground.render(gBufferShader); GLError.checkThrow()
@@ -641,6 +644,7 @@ class Scene(private val window: GameWindow) {
         gBufferObject.gIsPortal.bind(0)
         screenShader.setUniform("tex", 0)
         screenQuadMesh.render(); GLError.checkThrow()*/
+
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
