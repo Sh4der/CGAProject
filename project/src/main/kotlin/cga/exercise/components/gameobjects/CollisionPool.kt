@@ -50,19 +50,6 @@ class CollisionPool {
         return false
     }
 
-    fun checkRectangleCollisionEntity(currentWall: Collision, col: Collision) : Collision {
-        for (c in collisionPool) {
-            if (!(col.x1 >= c.x2 || c.x1 >= col.x2) &&! (col.y1 >= c.y2 || c.y1 >= col.y2) && !(col.z1 >= c.z2 || c.z1 >= col.z2)) {
-                if (c.getCollisionSide(col.x2 - col.x1, col.y2 - col.y1, col.z2 - col.z1) == 22f) {
-                    if (currentWall != c) {
-                        return c
-                    }
-                }
-            }
-        }
-        return Collision(0f,0f,0f,0f,0f,0f)
-    }
-
     fun addCollisionFromObject(path: String, rot: Vector3f) {
 
         // Create textures to compare with meshs' current texture and define if a portal can be created on this mesh or not.

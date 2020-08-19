@@ -108,7 +108,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         collisionAlmostBox3Dp2 = Vector3f(x+0.15f, y+3f, z+2f)
 
         //Rectangle Collision
-        portalRecCollision = Collision(x-1f, y-2f, z-1f,x+1f, 0f, z+1f)
+        portalRecCollision = Collision(x-1f, y-1f, z-1f,x+1f, y+1f, z+1f)
     }
 
     // Set Camera Parents is now reworked and does something different.
@@ -316,7 +316,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         return distance
     }
 
-    fun setPositionRotation(pos: Vector4f, colPool: CollisionPool) {
+    fun setPositionRotation(pos: Vector4f, colPool: CollisionPool, level: Renderable?) {
         initSet = pos
 
         x = pos.x
@@ -325,15 +325,17 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
         roty = pos.w
 
-        portalRecCollision = Collision(x-1f, y-2f, z-1f,x+1f, 0f, z+1f)
+        //portalRecCollision = Collision(x-1f, y-3f, z-1f,x+1f, y+1f, z+1f)
+        portalRecCollision.updateCollision(x-1f, y-3f, z-1f,x+1f, y+1f, z+1f)
 
-        //Check if portal is maybe inside the floor - DOESNT WORK YET!
-        val colFloor = colPool.checkRectangleCollisionEntity(colPool.checkPointCollisionEntity(x,y,z), portalRecCollision)
+        //Check if portal is maybe inside the floor
+        val colFloor = level?.checkCollisionWithPortal(this)!!
 
-        if (colFloor.y2 != 0f && colFloor.y2 < y) {
+        if (colFloor.y2 != 0f && colFloor.y2 > y-3) {
             y = colFloor.y2 + 3f
-            println(y)
         }
+
+        initSet.y = y
 
         //Portal & Frame transformation
         portalWall.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))
@@ -360,14 +362,14 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
         roty = pos.w
 
-        var clampValueMin = -0.235995f
-        var clampValueMax = -0.235f
+        val clampValueMin = -0.2365f//-0.235995f
+        val clampValueMax = -0.234f
 
-        var distanceToPlayer = pointDistance(x,z,player.x(),player.z())
+        val distanceToPlayer = pointDistance(x,z,player.x(),player.z())
 
-        var clampedDistance = Math.min(clampValueMax,Math.max(distanceToPlayer/1000 + clampValueMin, clampValueMin))
+        val clampedDistance = Math.min(clampValueMax,Math.max(distanceToPlayer/1000 + clampValueMin, -0.235990f))
 
-        println(distanceToPlayer/1000)
+        //println(clampedDistance)
 
         //Portal & Frame transformation
         portalWall.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))

@@ -227,15 +227,15 @@ class Scene(private val window: GameWindow) {
 
 
         val quadArray = floatArrayOf(
-                -1f, -1f, 0f, 0f,
-                1f, 1f, 1f, 1f,
-                -1f, 1f, 0f, 1f,
-                1f, -1f, 1f, 0f
+            -1f, -1f, 0f, 0f,
+            1f, 1f, 1f, 1f,
+            -1f, 1f, 0f, 1f,
+            1f, -1f, 1f, 0f
         )
 
         val quadIndices = intArrayOf(
-                0, 1, 2,
-                0, 3, 1
+            0, 1, 2,
+            0, 3, 1
         )
 
 
@@ -283,41 +283,35 @@ class Scene(private val window: GameWindow) {
         rob?.meshes?.get(0)?.material?.diff = diffTex
 
         testLevel = ModelLoader.loadModel("assets/models/test_level_empty_notex2.obj", 0f, 0f, 0f)
+        //testLevel?.setEmitColor(Vector3f(1f,1f,1f))
         testLevel?.meshes?.get(0)?.material?.emit = emitTexMetal1
         testLevel?.meshes?.get(0)?.material?.specular = specTexMetal1
         testLevel?.meshes?.get(0)?.material?.diff = diffTexMetal1
         testLevel?.meshes?.get(0)?.material?.tcMultiplier = Vector2f(64f, 64f)
-        testLevel?.meshes?.get(0)?.material?.emitColor = Vector3f(1f)
         testLevel?.meshes?.get(1)?.material?.emit = emitTex
         testLevel?.meshes?.get(1)?.material?.specular = specTex
         testLevel?.meshes?.get(1)?.material?.diff = diffTex
         testLevel?.meshes?.get(1)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
-        testLevel?.meshes?.get(1)?.material?.emitColor = Vector3f(1f)
         testLevel?.meshes?.get(2)?.material?.emit = emitTex
         testLevel?.meshes?.get(2)?.material?.specular = specTex
         testLevel?.meshes?.get(2)?.material?.diff = diffTex
         testLevel?.meshes?.get(2)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
-        testLevel?.meshes?.get(2)?.material?.emitColor = Vector3f(1f)
         testLevel?.meshes?.get(3)?.material?.emit = emitTex
         testLevel?.meshes?.get(3)?.material?.specular = specTex
         testLevel?.meshes?.get(3)?.material?.diff = diffTex
         testLevel?.meshes?.get(3)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
-        testLevel?.meshes?.get(3)?.material?.emitColor = Vector3f(1f)
         testLevel?.meshes?.get(4)?.material?.emit = emitTex
         testLevel?.meshes?.get(4)?.material?.specular = specTex
         testLevel?.meshes?.get(4)?.material?.diff = diffTex
         testLevel?.meshes?.get(4)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
-        testLevel?.meshes?.get(4)?.material?.emitColor = Vector3f(1f)
         testLevel?.meshes?.get(5)?.material?.emit = emitTex
         testLevel?.meshes?.get(5)?.material?.specular = specTex
         testLevel?.meshes?.get(5)?.material?.diff = diffTex
         testLevel?.meshes?.get(5)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
-        testLevel?.meshes?.get(5)?.material?.emitColor = Vector3f(1f)
         testLevel?.meshes?.get(6)?.material?.emit = emitTex
         testLevel?.meshes?.get(6)?.material?.specular = specTex
         testLevel?.meshes?.get(6)?.material?.diff = diffTex
         testLevel?.meshes?.get(6)?.material?.tcMultiplier = Vector2f(50.8f, 64f)
-        testLevel?.meshes?.get(6)?.material?.emitColor = Vector3f(1f)
 
 
 
@@ -333,8 +327,8 @@ class Scene(private val window: GameWindow) {
 
         //Animation test
         animatedPlayer = Animation("assets/char/char_", 0, 19, 0f, 180f, 0f)
-        animatedPlayer?.setParent(player!!)
-        animatedPlayer?.scaleLocal(Vector3f(0.3f))
+        animatedPlayer.setParent(player!!)
+        animatedPlayer.scaleLocal(Vector3f(0.3f))
 
     }
 
@@ -437,8 +431,13 @@ class Scene(private val window: GameWindow) {
         portalGunPortal2?.parent = portal2.camera
         spotLightPortal1.parent = portal1.camera
         spotLightPortal2.parent = portal2.camera
-        //portal1.setPositionRotationClamp(player!!)
-        //portal2.setPositionRotationClamp(player!!)
+
+        //TEST
+        //val getWallThatCollidesWithPortal = collisionPool.checkPointCollisionEntity(portal1.portalWall.x(),portal1.portalWall.y(),portal1.portalWall.z())
+        //println(getWallThatCollidesWithPortal)
+        //testLevel?.compareCollisionBox(getWallThatCollidesWithPortal)
+
+
 
         //Render Texture from portal cameras
         //portal1.generateTexture()
@@ -616,6 +615,7 @@ class Scene(private val window: GameWindow) {
         //player?.render(gBufferShader); GLError.checkThrow()
         portalGun?.render(gBufferShader); GLError.checkThrow()
         //animatedPlayer.render(gBufferShader)
+        //testLevel?.renderWithPortalCheckDebugging(gBufferShader, portal1)
         testLevel?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
@@ -832,7 +832,7 @@ class Scene(private val window: GameWindow) {
             val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
             val collisionPos = raycast.moveUntilCollision(collisionPool)
             if (collisionPos != Vector4f(-9999f)) {
-                portal1.setPositionRotation(collisionPos, collisionPool)
+                portal1.setPositionRotation(collisionPos, collisionPool, testLevel!!)
             }
         }
 
@@ -840,9 +840,12 @@ class Scene(private val window: GameWindow) {
             val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
             val collisionPos = raycast.moveUntilCollision(collisionPool)
             if (collisionPos != Vector4f(-9999f)) {
-                portal2.setPositionRotation(collisionPos, collisionPool)
+                portal2.setPositionRotation(collisionPos, collisionPool, testLevel!!)
             }
         }
+
+        portal1.setPositionRotationClamp(player!!)
+        portal2.setPositionRotationClamp(player!!)
 
 
 
