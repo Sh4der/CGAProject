@@ -131,7 +131,7 @@ class Scene(private val window: GameWindow) {
         }
         player?.meshes?.get(2)?.material?.emitColor = Vector3f(1f, 0f, 0f)
         player?.scaleLocal(Vector3f(1f))
-        player?.setPosition(-5f,0f,8f)
+        player?.setPosition(-5f,1f,8f)
 
         //Load in portal gun
         portalGun = ModelLoader.loadModel("assets/models/Portal Gun/Portal Gun.obj", 0f,0f,0f)
@@ -282,13 +282,14 @@ class Scene(private val window: GameWindow) {
         rob?.meshes?.get(0)?.material?.specular = specTex
         rob?.meshes?.get(0)?.material?.diff = diffTex
 
-        testLevel = ModelLoader.loadModel("assets/models/test_level_1.obj", 0f, 0f, 0f)
+        testLevel = ModelLoader.loadModel("assets/models/test_level2.obj", 0f, 0f, 0f)
         testLevel?.setEmitColor(Vector3f(1f))
         for (m in testLevel?.meshes!!) {
             m.material?.emit = emitTex
             m.material?.specular = specTex
             m.material?.diff = diffTex
-            m.material?.tcMultiplier = Vector2f(64f, 64f)
+            //m.material?.tcMultiplier = Vector2f(m.getHeight(), Math.max(m.getDepth(), m.getWidth()))
+            m.material = Material(Texture2D("assets/textures/con_wall_1.png", true), Texture2D("assets/textures/con_wall_1_emit.png", false), Texture2D("assets/textures/con_wall_1.png", true), 60f, Vector2f(m.getHeight()*4, Math.max(m.getDepth(), m.getWidth())*4));
         }
 
         //Add collisions
@@ -296,7 +297,7 @@ class Scene(private val window: GameWindow) {
         //collisionPool.addCollision(-22f,0f,-1f,22f,22f,0f)
         //collisionPool.addCollision(8f,0f,-22f,10f,22f,22f)
         //Add collision from a 3d model
-        collisionPool.addCollisionFromObject("assets/models/test_level_1.obj", Vector3f(0f))
+        collisionPool.addCollisionFromObject("assets/models/test_level2.obj", Vector3f(0f))
 
 
 
@@ -975,5 +976,5 @@ class Scene(private val window: GameWindow) {
     }
 
 
-    fun getPlayerCollision(x: Float, y: Float, z: Float) = Collision(x-0.2f, y, z-0.2f, x+0.2f, y+0.4f, z+0.2f)
+    fun getPlayerCollision(x: Float, y: Float, z: Float) = Collision(x-0.2f, y, z-0.2f, x+0.2f, y+2f, z+0.2f)
 }

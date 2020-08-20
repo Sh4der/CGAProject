@@ -1,5 +1,6 @@
 package cga.exercise.components.geometry
 
+import cga.exercise.components.gameobjects.Collision
 import cga.exercise.components.shader.ShaderProgram
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.*
@@ -84,5 +85,23 @@ class Mesh(val vertexdata: FloatArray, indexdata: IntArray, attributes: Array<Ve
         if (ibo != 0) GL15.glDeleteBuffers(ibo)
         if (vbo != 0) GL15.glDeleteBuffers(vbo)
         if (vao != 0) GL30.glDeleteVertexArrays(vao)
+    }
+
+    fun getHeight() : Float {
+        val col = Collision(0f,0f,0f,0f,0f,0f)
+        col.createCollisionFromMesh(this)
+        return Math.abs(col.y2 - col.y1)
+    }
+
+    fun getWidth() : Float {
+        val col = Collision(0f,0f,0f,0f,0f,0f)
+        col.createCollisionFromMesh(this)
+        return Math.abs(col.x2 - col.x1)
+    }
+
+    fun getDepth() : Float {
+        val col = Collision(0f,0f,0f,0f,0f,0f)
+        col.createCollisionFromMesh(this)
+        return Math.abs(col.z2 - col.z1)
     }
 }

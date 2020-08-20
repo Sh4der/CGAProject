@@ -36,7 +36,9 @@ class Raycast(var x: Float, var y: Float, var z: Float, val mm: Matrix4f) : Tran
                     var zret = this.getWorldPosition().z
                     if (getRotation.x == 90f || getRotation.x == 270f) {
                         if (getColMask.x2 - getColMask.x1 >= 3) {
-                            xret = Math.max(Math.min(this.getWorldPosition().x, getColMask.x2-1.5f), getColMask.x1+1.5f)
+                            //if (!col.checkNeighborX(getColMask.x1, getColMask.y1, getColMask.z1, getColMask.x2, getColMask.y2, getColMask.z2)) {
+                                xret = Math.max(Math.min(this.getWorldPosition().x, getColMask.x2 - 1.5f), getColMask.x1 + 1.5f)
+                            //}
                             zret = getRotation.y
                         }
                         else {
@@ -45,7 +47,9 @@ class Raycast(var x: Float, var y: Float, var z: Float, val mm: Matrix4f) : Tran
                     }
                     if (getRotation.x == 0f || getRotation.x == 180f) {
                         if (getColMask.z2 - getColMask.z1 >= 3) {
-                            zret = Math.max(Math.min(this.getWorldPosition().z, getColMask.z2 - 1.5f), getColMask.z1 + 1.5f)
+                            //if (!col.checkNeighborZ(getColMask.x1, getColMask.y1, getColMask.z1, getColMask.x2, getColMask.y2, getColMask.z2)) {
+                                zret = Math.max(Math.min(this.getWorldPosition().z, getColMask.z2 - 1.5f), getColMask.z1 + 1.5f)
+                            //}
                             xret = getRotation.y
                         }
                         else {

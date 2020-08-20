@@ -143,4 +143,23 @@ class CollisionPool {
         }
 
     }
+
+
+    fun checkNeighborX(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float) : Boolean {
+        for (c in collisionPool) {
+            if ((c.x2 == x1 && c.z1 == z1 && c.z2 == z2) || (c.x1 == x2 && c.z1 == z1 && c.z2 == z2)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun checkNeighborZ(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float) : Boolean {
+        for (c in collisionPool) {
+            if ((c.z2 == z1 && c.x1 == x1 && c.x2 == x2) || (c.z1 == z2 && c.x1 == x1 && c.x2 == x2)) {
+                return true
+            }
+        }
+        return false
+    }
 }
