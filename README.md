@@ -1,25 +1,33 @@
 # CGAProject
-Dies ist das Template Projekt für die Abschlussprojekte im Modul Computergrafik und Animation an der TH Köln.
+Dies ist ein kleiner Klon vom beliebten Portal und Portal 2 Spiel von Valve.
 
-Bitte forken Sie dieses Projekt und entwickeln Sie Ihr Abschlussprojekt in diesem Fork weiter. Denken Sie daran uwemuesse und martineisemann als Collaborators hinzuzufügen, damit wir darauf zugreifen können.
-
-Löschen Sie als erstes den Abschnitt CGAProjekt in dieser Datei und füllen Sie den Rest entsprechend aus für die Abgabe. 
+Der Spieler ist in einer kleinen Sanbox Welt gefangen und kann verschiedene Hindernisse mithilfe von Portalen, die an Wände projiziert werden, umgehen.
 
 # Projektname
-Fügen Sie ihren Projektnamen hinzu
+Portal 3
 
 # Teammitglieder
-Listen Sie hier noch einmal alle Teammitglieder auf.
-- Armin Anfang
-- Berta Beliebig
-- Carola Coautor
+- Nico Thometzki
+- Lukas Berner
+- Janine Doliwa
 
 # Featureliste 
-Listen Sie hier alle relevanten Features als Liste mit sinnvoller Reihenfolge auf mit Angabe wer das Feature implementiert hat.
+- Portal + Portal effect (Nico)
+- Collision-Engine (Nico)
+- Movement (Nico)
+- Raycasting (Nico)
+- Framebuffers (Lukas)
+- SSAO Shader (Lukas)
+- Cell Shading (Lukas)
+- Lights (Lukas)
+- Character Animation (Janine)
+- 3D Level (Janine)
 
-Bspw.
-
-- Verschiedene Kameramodelle (Wechsel zwischen orthographischer und perspektivischer Kamera mittels "c") (Berta)
-- Dynamische Kamera (Steuerung mittels Maus und "WASD" auf der Tastatur) (Carola und Armin)
-- Verschiedene Shaderprogramme (Wechsel mittels "s") (Carola)
-- ...
+# Steuerung
+MB Left: Blaues Portal
+MB Right: Orangenes Portal
+C: Cell Shading ON/OFF
+F: Taschenlampe ON/OFF
+E: Benutzen-Taste (mit Objekten interagieren)
+W, A, S, D, Space: Movement
+O: Spieler an den Anfang setzen
