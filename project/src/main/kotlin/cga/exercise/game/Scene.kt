@@ -139,7 +139,7 @@ class Scene(private val window: GameWindow) {
         }
         player?.meshes?.get(2)?.material?.emitColor = Vector3f(1f, 0f, 0f)
         player?.scaleLocal(Vector3f(1f))
-        player?.setPosition(11.7f,1f,57f)
+        player?.setPosition(11.7f,1.2637f,57f)
 
         //Load in portal gun
         portalGun = ModelLoader.loadModel("assets/models/Portal Gun/Portal Gun.obj", 0f,0f,0f)
@@ -300,9 +300,9 @@ class Scene(private val window: GameWindow) {
 
 
         //Add collision from a 3d model
-        collisionPool.addCollisionFromObject("assets/models/test_level2.obj", Vector3f(0f))
-        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f))
-        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(4f,0f,0f))
+        collisionPool.addCollisionFromObject("assets/models/mainLevel.obj", Vector3f(0f))
+        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(-14f,0f,17f))
+        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(-9f,17f,11f))
 
 
         //Animation test
@@ -315,8 +315,8 @@ class Scene(private val window: GameWindow) {
         buttonStart = ModelLoader.loadModel("assets/models/button.obj", 0f, 0f, 0f)
         buttonEnd = ModelLoader.loadModel("assets/models/button.obj", 0f, 0f, 0f)
 
-        buttonStart?.setPosition(0f,0f,0f)
-        buttonEnd?.setPosition(4f,0f,0f)
+        buttonStart?.setPosition(-14f,0f,17f)
+        buttonEnd?.setPosition(-9f,17f,11f)
 
         for (m in buttonStart?.meshes!!) {
             m.material?.emit = Texture2D("assets/textures/ground_spec.png", true)
@@ -776,6 +776,11 @@ class Scene(private val window: GameWindow) {
 
         //Reset player position
         if (window.getKeyState(GLFW.GLFW_KEY_O)) {
+            player?.setPosition(11.7f,1.2637f,57f)
+        }
+
+        //When player falls into the void
+        if (player?.y()!! < -10) {
             player?.setPosition(11.7f,1f,57f)
         }
 
