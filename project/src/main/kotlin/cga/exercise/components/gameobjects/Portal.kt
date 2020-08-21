@@ -44,6 +44,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     private var collisionAlmostBox3Dp1 : Vector3f //part1
     private var collisionAlmostBox3Dp2 : Vector3f //part2
     var portalRecCollision : Collision
+    private var portalWallScale : Float
 
     var goingOutCoord = Vector3f(0f)
 
@@ -92,14 +93,17 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalFrame?.meshes?.get(0)?.material?.emit = Texture2D("assets/textures/ground_diff.png", false)
         portalFrame?.meshes?.get(0)?.material?.specular = Texture2D("assets/textures/ground_diff.png", false)
 
+        portalWallScale = 0.0f
         //Portal & Frame transformation
         portalWall.rotateLocal(rotx,roty,rotz)
         portalWall.translateGlobal(Vector3f(x,y,z))
-        portalWall.scaleLocal(Vector3f(1.18f, 0.81f, 0.81f))
+        //portalWall.scaleLocal(Vector3f(1.18f, 0.81f, 0.81f))
+        portalWall.scaleLocal(Vector3f(1.18f, 0.01f+portalWallScale, 0.0f+portalWallScale))
 
         portalFrame?.rotateLocal(rotx,roty,rotz)
         portalFrame?.translateGlobal(Vector3f(x,y,z))
-        portalFrame?.scaleLocal(Vector3f(0.8f, 0.8f, 0.8f))
+        //portalFrame?.scaleLocal(Vector3f(0.8f, 0.8f, 0.8f))
+        portalFrame?.scaleLocal(Vector3f(0.8f, portalWallScale, portalWallScale))
 
         //Define camera
         camera = TronCamera()
@@ -282,7 +286,15 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     }
 
     // Renders portals with the portalShader (which will be set when calling this function)
-    fun render(shaderProgram: ShaderProgram) {
+    fun render(shaderProgram: ShaderProgram, dt: Float) {
+
+        //Portal animation (grow)
+        if (portalWallScale < 1f) {
+            portalWallScale += 2f * dt
+            portalWall.scaleLocal(Vector3f(1.18f, portalWallScale, 0.0f+portalWallScale))
+            portalFrame?.scaleLocal(Vector3f(1f, portalWallScale, portalWallScale))
+        }
+
         shaderProgram.use()
 
         shaderProgram.setUniform("isPortal", 1.0f)
@@ -297,9 +309,9 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         //portalCam.render(shaderProgram) //This is not a camera, but rather a 3d object that shows the position and rotation of the camera. Used for debugging.
     }
 
-    fun renderWithPortalCheck(shaderProgram: ShaderProgram, otherPortal: Portal) {
+    fun renderWithPortalCheck(shaderProgram: ShaderProgram, otherPortal: Portal, dt: Float) {
         if (pointDistance(this.x, this.y, otherPortal.x, otherPortal.y) >= 1.5f) {
-            render(shaderProgram)
+            render(shaderProgram, dt)
         }
     }
 
@@ -365,6 +377,10 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalFrame?.setPosition(x,y,z)
         portalFrame?.translateLocal(Vector3f(-0.234f,0f,0f))
         portalFrame?.scaleLocal(Vector3f(0.8f, 0.8f, 0.8f))
+
+        //Start portal animation
+        portalWallScale = 0f
+
 
         x = portalWall.x()
         y = portalWall.y()
