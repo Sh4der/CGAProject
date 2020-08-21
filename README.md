@@ -3,6 +3,8 @@ Dies ist ein kleiner Klon vom beliebten Portal und Portal 2 Spiel von Valve.
 
 Der Spieler ist in einer kleinen Sanbox Welt gefangen und kann verschiedene Hindernisse mithilfe von Portalen, die an Wände projiziert werden, umgehen.
 
+Video: https://github.com/Sh4der/CGAProject/blob/master/video/erkl%C3%A4rvideo_portal3.mp4
+
 # Projektname
 Portal 3
 
