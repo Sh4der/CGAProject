@@ -55,7 +55,7 @@ class GeometryFramebuffer(_width : Int, _height : Int) : Framebuffer(_width, _he
         gSpecTex.setTexParams(GL12.GL_NEAREST, GL12.GL_NEAREST)
         gShininess = createTextureAttachment(5, false, GL11.GL_RED, GL11.GL_RED, GL11.GL_FLOAT)
         gShininess.setTexParams(GL12.GL_NEAREST, GL12.GL_NEAREST)
-        gEmitColor = createTextureAttachment(6, false, GL11.GL_RGBA, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE)
+        gEmitColor = createTextureAttachment(6, false, GL11.GL_RGBA, GL11.GL_RGBA, GL11.GL_FLOAT)
         gEmitColor.setTexParams(GL12.GL_NEAREST, GL12.GL_NEAREST)
         gIsPortal = createTextureAttachment(7, false, GL42.GL_RED, GL42.GL_RED, GL11.GL_FLOAT)
         gIsPortal.setTexParams(GL12.GL_NEAREST, GL12.GL_NEAREST)
