@@ -639,15 +639,6 @@ class Scene(private val window: GameWindow) {
 
         //Gravity & Jumping
         if (collisionPool.checkRectangleCollision(getPlayerCollision(player!!.x(), player!!.y() + yspeed, player!!.z()))) {
-            if (yspeed < 0) {
-                /*if (!collisionPool.checkRectangleCollision(getPlayerCollision(player!!.x(), player!!.y(), player!!.z()))) {
-                    //Does anything need to happen here?
-                }*/
-                if(!(k_u||k_l||k_r||k_d)){
-                    hspeed = 0f
-                    vspeed = 0f
-                }
-            }
             yspeed = 0f
             //Jumping when on the floor
             if (k_a && canjump) {
