@@ -5,7 +5,7 @@ out float FragColor;
 in vec2 ioTexCoords;
 
 //constants to configure the ssao shading
-const int sampleCount = 8; //64 vorher
+const int sampleCount = 12; //64 vorher
 const float radius = 3f; //0.5 vorher
 const float bias = 0.01f; //0.025 vorher
 
