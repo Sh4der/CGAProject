@@ -362,7 +362,7 @@ class Scene(private val window: GameWindow) {
         testLevel?.renderWithPortalCheck(gBufferShader, portal2)
         portalGunPortal1?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
-        portal1.renderWithPortalCheck(gBufferShader, portal2)
+        portal1.renderWithPortalCheck(gBufferShader, portal2, dt)
         glEnable(GL_CULL_FACE)
         gBufferObjectPortal1.stopRender()
 
@@ -417,7 +417,7 @@ class Scene(private val window: GameWindow) {
         testLevel?.renderWithPortalCheck(gBufferShader, portal1)
         portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
-        portal2.renderWithPortalCheck(gBufferShader, portal1)
+        portal2.renderWithPortalCheck(gBufferShader, portal1, dt)
         glEnable(GL_CULL_FACE)
         gBufferObjectPortal2.stopRender()
 
@@ -476,8 +476,8 @@ class Scene(private val window: GameWindow) {
         buttonStart?.render(gBufferShader)
         buttonEnd?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
-        portal1.render(gBufferShader)
-        portal2.render(gBufferShader)
+        portal1.render(gBufferShader, dt)
+        portal2.render(gBufferShader, dt)
         glEnable(GL_CULL_FACE)
         gBufferObject.stopRender()
 
@@ -802,22 +802,23 @@ class Scene(private val window: GameWindow) {
 
     var lastX = 0.0
     var lastY = 0.0
+    var sensitivity = 0.03f
 
     fun onMouseMove(xpos: Double, ypos: Double) {
 
-        player?.rotateLocal(0f, (lastX - xpos).toFloat() * 0.02f, 0f)
-        cam.rotateLocal((lastY - ypos).toFloat() * 0.02f, 0f, 0f)
-        portal1.camera.rotateLocal((lastY - ypos).toFloat() * 0.02f, 0f, 0f)
-        portal2.camera.rotateLocal((lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+        player?.rotateLocal(0f, (lastX - xpos).toFloat() * sensitivity, 0f)
+        cam.rotateLocal((lastY - ypos).toFloat() * sensitivity, 0f, 0f)
+        portal1.camera.rotateLocal((lastY - ypos).toFloat() * sensitivity, 0f, 0f)
+        portal2.camera.rotateLocal((lastY - ypos).toFloat() * sensitivity, 0f, 0f)
         if (cam.getXDirDeg() > 180f) {
-            cam.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
-            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
-            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+            cam.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
+            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
+            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
         }
         else if (cam.getXDir() < 0f) {
-            cam.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
-            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
-            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * 0.02f, 0f, 0f)
+            cam.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
+            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
+            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
         }
 
         lastX = xpos
@@ -846,6 +847,10 @@ class Scene(private val window: GameWindow) {
         if (startTime == 0f && pointDistance3d(player!!.x(), player!!.y(), player!!.z(), buttonStart!!.x(), buttonStart!!.y(), buttonStart!!.z()) < 0.8f) {
             startTime = t
             println("TIMER START!")
+        }
+        else if (startTime > 0 && pointDistance3d(player!!.x(), player!!.y(), player!!.z(), buttonStart!!.x(), buttonStart!!.y(), buttonStart!!.z()) < 0.8f) {
+            startTime = 0f
+            println("TIMER STOPPED!")
         }
     }
 
