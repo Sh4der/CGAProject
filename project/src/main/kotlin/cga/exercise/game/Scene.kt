@@ -887,6 +887,8 @@ class Scene(private val window: GameWindow) {
         if (startTime == 0f && pointDistance3d(player!!.x(), player!!.y(), player!!.z(), buttonStart!!.x(), buttonStart!!.y(), buttonStart!!.z()) < 0.8f) {
             startTime = t
             println("TIMER START!")
+            portal1.setPositionRotation(Vector4f(-999f), collisionPool, testLevel)
+            portal2.setPositionRotation(Vector4f(-999f), collisionPool, testLevel)
         }
         else if (startTime > 0 && pointDistance3d(player!!.x(), player!!.y(), player!!.z(), buttonStart!!.x(), buttonStart!!.y(), buttonStart!!.z()) < 0.8f) {
             startTime = 0f
