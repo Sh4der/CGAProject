@@ -31,3 +31,4 @@ Portal 3
 - E: Benutzen-Taste (mit Objekten interagieren)
 - W, A, S, D, Space: Movement
 - O: Spieler an den Anfang setzen
+- L: Place Spotlight
