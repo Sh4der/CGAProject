@@ -20,11 +20,7 @@ class Raycast(var x: Float, var y: Float, var z: Float, val mm: Matrix4f) : Tran
         this.setModelMatrix(mm)
 
         for (i in 0 .. 100000) {
-            /*
-            x += xdir*speed
-            y += ydir*speed
-            z += zdir*speed
-            */
+
             translateLocal(Vector3f(0f,0f,speed))
             if (col.checkPointCollision(this.getWorldPosition().x,this.getWorldPosition().y,this.getWorldPosition().z)) {
                 val getColMask = col.checkPointCollisionEntity(this.getWorldPosition().x,this.getWorldPosition().y,this.getWorldPosition().z)
@@ -42,7 +38,7 @@ class Raycast(var x: Float, var y: Float, var z: Float, val mm: Matrix4f) : Tran
                             zret = getRotation.y
                         }
                         else {
-                            return Vector4f(9999f)
+                            return Vector4f(-9999f)
                         }
                     }
                     if (getRotation.x == 0f || getRotation.x == 180f) {
@@ -53,7 +49,7 @@ class Raycast(var x: Float, var y: Float, var z: Float, val mm: Matrix4f) : Tran
                             xret = getRotation.y
                         }
                         else {
-                            return Vector4f(9999f)
+                            return Vector4f(-9999f)
                         }
                     }
                     val yret = Math.max(Math.min(this.getWorldPosition().y, getColMask.y2-3f), getColMask.y1+3f)

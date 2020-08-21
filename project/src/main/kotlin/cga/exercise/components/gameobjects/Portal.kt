@@ -97,9 +97,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
         //Define camera
         camera = TronCamera()
-        //camera.rotateLocal(0f,-90f,0f)
         camera.translateLocal(Vector3f(0f,0f,0f))
-        //camera.translateGlobal(Vector3f(0f))
 
         //Create Collisionbox
         collisionBox3Dp1 = Vector3f(x-0.15f, y-3f, z-2f)
@@ -314,13 +312,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         return false
     }
 
-    fun pointDistance(x1: Float, y1: Float, x2: Float, y2: Float):Float {
-        val distance = Math.sqrt(
-                (x2-x1).pow(2) + (y2-y1).pow(2)
-        )
-
-        return distance
-    }
+    fun pointDistance(x1: Float, y1: Float, x2: Float, y2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2))
 
     fun setPositionRotation(pos: Vector4f, colPool: CollisionPool, level: Renderable?) {
 

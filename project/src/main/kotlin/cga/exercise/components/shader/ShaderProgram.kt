@@ -4,6 +4,7 @@ import org.joml.*
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
+import org.lwjgl.system.MemoryStack
 import java.nio.FloatBuffer
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -223,7 +224,6 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
             val loc = GL20.glGetUniformLocation(programID, name)
             if(loc != -1)
                 uniformLocationCache[name] = loc
-            //println("${uniformLocationCache[name]} : $name")
             return loc
         }
     }

@@ -24,8 +24,12 @@ import cga.framework.OBJLoader.OBJResult
 import org.joml.*
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL11.*
+import java.util.*
+import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.system.exitProcess
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 
 class Scene(private val window: GameWindow) {
@@ -45,6 +49,8 @@ class Scene(private val window: GameWindow) {
     private var wall : Renderable
     private var wall2 : Renderable
     private var testLevel : Renderable?
+    private var buttonStart : Renderable?
+    private var buttonEnd : Renderable?
 
     private var player : Renderable?
     private var animatedPlayer : Animation
@@ -133,7 +139,7 @@ class Scene(private val window: GameWindow) {
         }
         player?.meshes?.get(2)?.material?.emitColor = Vector3f(1f, 0f, 0f)
         player?.scaleLocal(Vector3f(1f))
-        player?.setPosition(-5f,1f,8f)
+        player?.setPosition(11.7f,1f,57f)
 
         //Load in portal gun
         portalGun = ModelLoader.loadModel("assets/models/Portal Gun/Portal Gun.obj", 0f,0f,0f)
@@ -271,10 +277,6 @@ class Scene(private val window: GameWindow) {
 
 
         //Portal Setup
-        /*
-        portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), -5f, 3f, -0.235f, 0f, 270f, 0f)
-        portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 8.235f, 3f, 5f, 0f, 180f, 0f)
-        */
         portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), 999f, 999f, -0.235f, 0f, 270f, 0f)
         portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 999f, 999f, 5f, 0f, 180f, 0f)
 
@@ -296,13 +298,11 @@ class Scene(private val window: GameWindow) {
             //m.material = Material(Texture2D("assets/textures/con_wall_1.png", true), Texture2D("assets/textures/con_wall_1_emit.png", false), Texture2D("assets/textures/con_wall_1.png", true), 60f, Vector2f(m.getHeight() * 4, Math.max(m.getDepth(), m.getWidth()) * 4));
         }
 
-        //Add collisions
-        //collisionPool.addCollision(-10f-2f,-1f,10f-2f,-10f+2f,3f,10f+2f)
-        //collisionPool.addCollision(-22f,0f,-1f,22f,22f,0f)
-        //collisionPool.addCollision(8f,0f,-22f,10f,22f,22f)
-        //Add collision from a 3d model
-        collisionPool.addCollisionFromObject("assets/models/mainLevel.obj", Vector3f(0f))
 
+        //Add collision from a 3d model
+        collisionPool.addCollisionFromObject("assets/models/test_level2.obj", Vector3f(0f))
+        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f))
+        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(4f,0f,0f))
 
 
         //Animation test
@@ -310,96 +310,29 @@ class Scene(private val window: GameWindow) {
         animatedPlayer.setParent(player!!)
         animatedPlayer.scaleLocal(Vector3f(0.3f))
 
+
+        //Add Button
+        buttonStart = ModelLoader.loadModel("assets/models/button.obj", 0f, 0f, 0f)
+        buttonEnd = ModelLoader.loadModel("assets/models/button.obj", 0f, 0f, 0f)
+
+        buttonStart?.setPosition(0f,0f,0f)
+        buttonEnd?.setPosition(4f,0f,0f)
+
+        for (m in buttonStart?.meshes!!) {
+            m.material?.emit = Texture2D("assets/textures/ground_spec.png", true)
+        }
+        buttonStart?.meshes?.get(0)?.material?.emitColor = Vector3f(0.025f)
+        buttonStart?.meshes?.get(1)?.material?.emitColor = Vector3f(0.008f, 1f, 0f)
+
+        for (m in buttonEnd?.meshes!!) {
+            m.material?.emit = Texture2D("assets/textures/ground_spec.png", true)
+        }
+        buttonEnd?.meshes?.get(0)?.material?.emitColor = Vector3f(0.025f)
+        buttonEnd?.meshes?.get(1)?.material?.emitColor = Vector3f(1f, 0f, 0f)
+
     }
 
     fun render(dt: Float, t: Float) {
-
-        //println(dt)
-
-        //------------------------Lukas---------------------//
-/*
-        gBufferObject.startRender(gBufferShader)
-        cam.bind(gBufferShader); GLError.checkThrow()
-        ground.render(gBufferShader); GLError.checkThrow()
-        player?.render(gBufferShader); GLError.checkThrow()
-        rob?.render(gBufferShader)
-        wall.render(gBufferShader)
-        wall2.render(gBufferShader)
-        glDisable(GL_CULL_FACE)
-        portal1.render(gBufferShader)
-        portal2.render(gBufferShader)
-        glEnable(GL_CULL_FACE)
-        gBufferObject.stopRender()
-
-        ssaoTextureFramebuffer.startRender(ssaoColorShader, gBufferObject)
-        cam.bind(ssaoColorShader)
-        screenQuadMesh.render()
-        ssaoTextureFramebuffer.stopRender()
-
-        blurFramebuffer.startRender(blurShader)
-        ssaoTextureFramebufferPortal1.ssaoColorTexture.bind(0)
-        blurShader.setUniform("ssaoInput", 0)
-        screenQuadMesh.render()
-        blurFramebuffer.stopRender()
-
-*/
-
-        //
-        //Rendert auf den Bildschirm kann aus kommentiert werden
-        //
-        /*glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
-        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
-        glDisable(GL_DEPTH_TEST)
-        screenShader.use(); GLError.checkThrow()
-        currentImage.bind(0)
-        screenShader.setUniform("tex", 0)
-        screenQuadMesh.render(); GLError.checkThrow()*/
-/*
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
-        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
-        glDisable(GL_DEPTH_TEST)
-
-        lightningShader.use(); GLError.checkThrow()
-        cam.bind(lightningShader)
-
-        lightpool.bind(lightningShader)
-
-        gBufferObject.gPosition.bind(0)
-        lightningShader.setUniform("gPosition", 0)
-        gBufferObject.gNormal.bind(1)
-        lightningShader.setUniform("gNormal", 1)
-        gBufferObject.gDiffTex.bind(2)
-        lightningShader.setUniform("gDiff", 2)
-        gBufferObject.gEmitTex.bind(3)
-        lightningShader.setUniform("gEmit", 3)
-        gBufferObject.gEmitTex.bind(4)
-        lightningShader.setUniform("gSpec", 4)
-        blurFramebuffer.blurFramebufferTexture.bind(5)
-        lightningShader.setUniform("ssao", 5)
-        gBufferObject.gShininess.bind(6)
-        lightningShader.setUniform("gShininess", 6)
-
-        screenQuadMesh.render(); GLError.checkThrow()*/
-
-
-        //------------------------Janine---------------------//
-
-        //
-        //Rendert auf den Bildschirm kann aus kommentiert werden
-        //
-/*
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
-        glEnable(GL11.GL_DEPTH_TEST)
-        staticShader.use()
-        cam.bind(staticShader)
-        pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader,"spotLight")
-        lightCycle?.render(staticShader)
-        ground.render(staticShader)
-
- */
-
-
 
 
         //------------------------Nico---------------------//
@@ -422,6 +355,8 @@ class Scene(private val window: GameWindow) {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal1.bindPortalCamera(gBufferShader); GLError.checkThrow()
         animatedPlayer.render(gBufferShader, dt)
+        buttonStart?.render(gBufferShader)
+        buttonEnd?.render(gBufferShader)
         testLevel?.renderWithPortalCheck(gBufferShader, portal2)
         portalGunPortal1?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
@@ -475,6 +410,8 @@ class Scene(private val window: GameWindow) {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal2.bindPortalCamera(gBufferShader); GLError.checkThrow()
         animatedPlayer.render(gBufferShader, dt)
+        buttonStart?.render(gBufferShader)
+        buttonEnd?.render(gBufferShader)
         testLevel?.renderWithPortalCheck(gBufferShader, portal1)
         portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
@@ -525,51 +462,6 @@ class Scene(private val window: GameWindow) {
 
 
 
-        //
-        //Render auf FBO -> Portals
-        //
-        /*portal1.renderToFramebufferStart(staticShader)
-        //cam.bind(staticShader)
-        pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader, "spotLight")
-        player?.render(staticShader)
-        ground.render(staticShader)
-        portalShader.use()
-        portal1.bindPortalCamera(portalShader)
-        portal1.render(portalShader)
-        //portal2.render(portalShader)
-        portal1.renderToFramebufferStop()
-
-        portal2.renderToFramebufferStart(staticShader)
-        //cam.bind(staticShader)
-        pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader, "spotLight")
-        player?.render(staticShader)
-        ground.render(staticShader)
-        portalShader.use()
-        portal2.bindPortalCamera(portalShader)
-        //portal1.render(portalShader)
-        portal2.render(portalShader)
-        portal2.renderToFramebufferStop()*/
-
-        //
-        //Rendert auf den Bildschirm kann aus kommentiert werden
-        //
-        /*glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT); GLError.checkThrow()
-        staticShader.use()
-        cam.bind(staticShader)
-        pointLight.bind(staticShader, "pointLight")
-        spotLight.bind(staticShader, "spotLight", Matrix4f())
-        lightCycle?.render(staticShader)
-        ground.render(staticShader)
-        portalShader.use()
-        cam.bind(portalShader)
-        glDisable(GL_CULL_FACE); GLError.checkThrow()
-        portal1.render(portalShader)
-        portal2.render(portalShader)
-        glEnable(GL_CULL_FACE); GLError.checkThrow()*/
-
-
 
         //Screen rendering
         portal1.setPositionRotationClamp(player!!)
@@ -579,6 +471,8 @@ class Scene(private val window: GameWindow) {
         cam.bind(gBufferShader); GLError.checkThrow()
         portalGun?.render(gBufferShader); GLError.checkThrow()
         testLevel?.render(gBufferShader)
+        buttonStart?.render(gBufferShader)
+        buttonEnd?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal1.render(gBufferShader)
         portal2.render(gBufferShader)
@@ -644,6 +538,10 @@ class Scene(private val window: GameWindow) {
 
 
 
+    private var startTime = 0f
+    private var endTime = 0f
+
+
 
     private var deltaF = 0f;
     private var deltaC = 0f;
@@ -670,6 +568,10 @@ class Scene(private val window: GameWindow) {
 
     var ytop = player!!.y() + yheight //Unused, because it is in the getPlayerCollision() function
     var ybottom = player!!.y() //Unused, because it is in the getPlayerCollision() function
+
+    var eKeyState = false
+    var leftMBState = false
+    var rightMBState = false
 
     fun update(dt: Float, t: Float) {
 
@@ -749,15 +651,6 @@ class Scene(private val window: GameWindow) {
 
         //Gravity & Jumping
         if (collisionPool.checkRectangleCollision(getPlayerCollision(player!!.x(), player!!.y() + yspeed, player!!.z()))) {
-            if (yspeed < 0) {
-                /*if (!collisionPool.checkRectangleCollision(getPlayerCollision(player!!.x(), player!!.y(), player!!.z()))) {
-                    //Does anything need to happen here?
-                }*/
-                if(!(k_u||k_l||k_r||k_d)){
-                    hspeed = 0f
-                    vspeed = 0f
-                }
-            }
             yspeed = 0f
             //Jumping when on the floor
             if (k_a && canjump) {
@@ -786,75 +679,35 @@ class Scene(private val window: GameWindow) {
 
         //Shoot portals to walls
         if (window.getMouseKeyState(GLFW.GLFW_MOUSE_BUTTON_1)) {
-            val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
-            val collisionPos = raycast.moveUntilCollision(collisionPool)
-            if (collisionPos != Vector4f(-9999f)) {
-                portal1.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+            if (!leftMBState) {
+                val raycast = Raycast(player!!.x(), player!!.y() + 2f, player!!.z(), cam.getWorldModelMatrix())
+                val collisionPos = raycast.moveUntilCollision(collisionPool)
+                if (collisionPos != Vector4f(-9999f)) {
+                    portal1.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+                }
+                leftMBState = true
             }
         }
+        else {leftMBState = false}
 
         if (window.getMouseKeyState(GLFW.GLFW_MOUSE_BUTTON_2)) {
-            val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
-            val collisionPos = raycast.moveUntilCollision(collisionPool)
-            if (collisionPos != Vector4f(-9999f)) {
-                portal2.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+            if (!rightMBState) {
+                val raycast = Raycast(player!!.x(), player!!.y() + 2f, player!!.z(), cam.getWorldModelMatrix())
+                val collisionPos = raycast.moveUntilCollision(collisionPool)
+                if (collisionPos != Vector4f(-9999f)) {
+                    portal2.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+                }
+                rightMBState = true
             }
         }
+        else {rightMBState = false}
 
+
+
+        // Calmp portal position to avoid z-fighting
         portal1.setPositionRotationClamp(player!!)
         portal2.setPositionRotationClamp(player!!)
 
-
-        /*
-        // OLD MOVEMENT CODE
-        if(window.getKeyState(GLFW.GLFW_KEY_W)) {
-            vspeed = -5f
-            val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(vspeed) * dt, player?.getYDir()!!.toFloat())
-            if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
-                player?.translateLocal(Vector3f(0f, 0f, vspeed * dt))
-            }
-        }
-        else if(window.getKeyState(GLFW.GLFW_KEY_S)) {
-            vspeed = 5f
-            val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(vspeed) * dt, player?.getYDir()!!.toFloat() + Math.toRadians(180f))
-            if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
-                player?.translateLocal(Vector3f(0f, 0f, vspeed * dt))
-            }
-        }
-        if(window.getKeyState(GLFW.GLFW_KEY_A)) {
-            //rotationDirection = -1f
-            hspeed = -5f
-            val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(hspeed) * dt, player?.getYDir()!!.toFloat() + Math.toRadians(90f))
-            if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
-                player?.translateLocal(Vector3f(hspeed * dt, 0f, 0f))
-            }
-        }
-        else if(window.getKeyState(GLFW.GLFW_KEY_D)) {
-            //rotationDirection = 1f
-            hspeed = 5f
-            val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(hspeed) * dt, player?.getYDir()!!.toFloat() - Math.toRadians(90f))
-            if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
-                player?.translateLocal(Vector3f(hspeed * dt, 0f, 0f))
-            }
-        }
-        */
-
-        //Check for collision
-        /*
-        val collisionLengthDir = getLengthdirPoint(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z, Math.abs(vspeed) * dt, player?.getYDir()!!.toFloat())
-        if (!collisionPool.checkPointCollision(collisionLengthDir.x, collisionLengthDir.y, collisionLengthDir.z)) {
-            player?.translateLocal(Vector3f(hspeed * dt, 0f, vspeed * dt))
-        }
-        */
-
-        /*if(rotationDirection == 0f){
-            lightCycle?.translateLocal(Vector3f(0f, 0f, speed * dt))
-        }
-        else if(speed != 0f)
-        {
-            lightCycle?.rotateAroundPoint(0f,  (360 * speed)/(2f*Math.PI.toFloat() * turningCycleRadius) * rotationDirection * dt, 0f, lightCycle!!.getWorldPosition().add(lightCycle!!.getXAxis().mul(turningCycleRadius*rotationDirection)))
-        }*/
-        //lightCycle?.meshes?.get(2)?.material?.emitColor = Vector3f((Math.sin(t) + 1f)/2, (Math.sin(t*2) + 1f)/2, (Math.sin(t*3) + 1f)/2)
 
 
         //Check if player goes through portal
@@ -862,15 +715,11 @@ class Scene(private val window: GameWindow) {
             //lightCycle?.setPosition(portal1.portalCam.getWorldPosition().x - 0.35f, portal1.portalCam.getWorldPosition().y, portal1.portalCam.getWorldPosition().z) //Teleports player to the other portal
             player?.setRotationA(portal1.portalCam.getRotationA())
             player?.setPosition(portal1.goingOutCoord.x, portal1.goingOutCoord.y-2f, portal1.goingOutCoord.z)
-            //hspeed = 0f
-            //vspeed = 0f
         }
         else if (portal2.checkCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)) {
             //lightCycle?.setPosition(portal2.portalCam.getWorldPosition().x + 0.35f, portal2.portalCam.getWorldPosition().y, portal2.portalCam.getWorldPosition().z) //Teleports player to the other portal
             player?.setRotationA(portal2.portalCam.getRotationA())
             player?.setPosition(portal2.goingOutCoord.x, portal2.goingOutCoord.y-2f, portal2.goingOutCoord.z)
-            //hspeed = 0f
-            //vspeed = 0f
         }
 
         portal1.setCameraParent(portal2, player, cam)
@@ -910,8 +759,25 @@ class Scene(private val window: GameWindow) {
         if(window.getKeyState(GLFW.GLFW_KEY_C) && t - deltaC >= 0.5f) {
             deltaC = t
             cellShading = if (cellShading == 1) 0 else 1
+
         }
 
+        //Press the use-key
+        if (window.getKeyState(GLFW.GLFW_KEY_E)) {
+            if (!eKeyState) {
+                eKeyState = true
+                startButtonTimer(t)
+                endButtonTimer(t)
+            }
+        }
+        else {
+            eKeyState = false
+        }
+
+        //Reset player position
+        if (window.getKeyState(GLFW.GLFW_KEY_O)) {
+            player?.setPosition(11.7f,1f,57f)
+        }
 
     }
 
@@ -922,8 +788,6 @@ class Scene(private val window: GameWindow) {
 
     fun onMouseMove(xpos: Double, ypos: Double) {
 
-        //cam.rotateAroundPoint((oldMousePosY-ypos).toFloat() * 0.002f, (oldMousePosX - xpos).toFloat() * 0.002f, 0f, Vector3f(0f))
-        //cam.rotateAroundPoint(0f, (oldMousePosX - xpos).toFloat() * 0.02f, 0f, Vector3f(0f))
         player?.rotateLocal(0f, (lastX - xpos).toFloat() * 0.02f, 0f)
         cam.rotateLocal((lastY - ypos).toFloat() * 0.02f, 0f, 0f)
         portal1.camera.rotateLocal((lastY - ypos).toFloat() * 0.02f, 0f, 0f)
@@ -947,38 +811,32 @@ class Scene(private val window: GameWindow) {
     fun cleanup() {}
 
 
-    //Player functions (Why is the player not an object as well? I don't know)
-    fun getLengthdirPoint(x: Float, y: Float, z: Float, length: Float, dir: Float) : Vector3f {
-        val lengthdirx = x + (length * (Math.cos(dir.toDouble()))).toFloat()
-        val lengthdirz = z + (length * (-Math.sin(dir.toDouble()))).toFloat()
+    fun lengthdir_x(length: Float, dir: Float) : Float = (length * (Math.cos(dir.toDouble()))).toFloat()
 
-        return Vector3f(lengthdirx, y, lengthdirz)
-    }
-
-    fun lengthdir_x(length: Float, dir: Float) : Float {
-        return (length * (Math.cos(dir.toDouble()))).toFloat()
-    }
-
-    fun lengthdir_z(length: Float, dir: Float) : Float {
-        return (length * (-Math.sin(dir.toDouble()))).toFloat()
-    }
-
-
-    //fun to get median
-    fun median(arrayList: ArrayList<Float>) : Float{
-
-        arrayList.sort()
-
-        //Check for even case
-        if (arrayList.size % 2 != 0) {
-            return arrayList.get(arrayList.size / 2)
-        }
-
-        //return (double)(a[(n - 1) / 2] + a[n / 2]) / 2.0;
-        return (arrayList.get((arrayList.size-1) / 2) + arrayList.get(arrayList.size / 2)) / 2.0f
-
-    }
-
+    fun lengthdir_z(length: Float, dir: Float) : Float = (length * (-Math.sin(dir.toDouble()))).toFloat()
 
     fun getPlayerCollision(x: Float, y: Float, z: Float) = Collision(x-0.2f, y, z-0.2f, x+0.2f, y+2f, z+0.2f)
+
+    fun pointDistance3d(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2) + (z2-z1).pow(2))
+
+    fun Float.round(decimals: Int): Float {
+        var multiplier = 1.0
+        repeat(decimals) { multiplier *= 10 }
+        return (round((this * multiplier).toInt()) / multiplier).toFloat()
+    }
+
+    fun startButtonTimer(t: Float) {
+        if (startTime == 0f && pointDistance3d(player!!.x(), player!!.y(), player!!.z(), buttonStart!!.x(), buttonStart!!.y(), buttonStart!!.z()) < 0.8f) {
+            startTime = t
+            println("TIMER START!")
+        }
+    }
+
+    fun endButtonTimer(t: Float) {
+        if (startTime > 0 && pointDistance3d(player!!.x(), player!!.y(), player!!.z(), buttonEnd!!.x(), buttonEnd!!.y(), buttonEnd!!.z()) < 0.8f) {
+            endTime = t
+            println("TIMER END: ${BigDecimal((endTime - startTime).toDouble()).setScale(2, RoundingMode.HALF_EVEN)}")
+            startTime = 0f
+        }
+    }
 }
