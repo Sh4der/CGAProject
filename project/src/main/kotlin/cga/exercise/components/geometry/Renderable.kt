@@ -86,4 +86,8 @@ class Renderable(val meshes : MutableList<Mesh>) : Transformable(), IRenderable 
         }
     }
 
+    override fun toString(): String {
+        return "X: ${x()}, Y: ${y()}, Z: ${z()}"
+    }
+
 }

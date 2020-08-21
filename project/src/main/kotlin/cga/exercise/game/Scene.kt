@@ -137,7 +137,7 @@ class Scene(private val window: GameWindow) {
         }
         player?.meshes?.get(2)?.material?.emitColor = Vector3f(1f, 0f, 0f)
         player?.scaleLocal(Vector3f(1f))
-        player?.setPosition(-5f,1f,8f)
+        player?.setPosition(11.7f,1f,57f)
 
         //Load in portal gun
         portalGun = ModelLoader.loadModel("assets/models/Portal Gun/Portal Gun.obj", 0f,0f,0f)
@@ -558,6 +558,8 @@ class Scene(private val window: GameWindow) {
     var ybottom = player!!.y() //Unused, because it is in the getPlayerCollision() function
 
     var eKeyState = false
+    var leftMBState = false
+    var rightMBState = false
 
     fun update(dt: Float, t: Float) {
 
@@ -674,20 +676,28 @@ class Scene(private val window: GameWindow) {
 
         //Shoot portals to walls
         if (window.getMouseKeyState(GLFW.GLFW_MOUSE_BUTTON_1)) {
-            val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
-            val collisionPos = raycast.moveUntilCollision(collisionPool)
-            if (collisionPos != Vector4f(-9999f)) {
-                portal1.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+            if (!leftMBState) {
+                val raycast = Raycast(player!!.x(), player!!.y() + 2f, player!!.z(), cam.getWorldModelMatrix())
+                val collisionPos = raycast.moveUntilCollision(collisionPool)
+                if (collisionPos != Vector4f(-9999f)) {
+                    portal1.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+                }
+                leftMBState = true
             }
         }
+        else {leftMBState = false}
 
         if (window.getMouseKeyState(GLFW.GLFW_MOUSE_BUTTON_2)) {
-            val raycast = Raycast(player!!.x(), player!!.y()+2f, player!!.z(), cam.getWorldModelMatrix())
-            val collisionPos = raycast.moveUntilCollision(collisionPool)
-            if (collisionPos != Vector4f(-9999f)) {
-                portal2.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+            if (!rightMBState) {
+                val raycast = Raycast(player!!.x(), player!!.y() + 2f, player!!.z(), cam.getWorldModelMatrix())
+                val collisionPos = raycast.moveUntilCollision(collisionPool)
+                if (collisionPos != Vector4f(-9999f)) {
+                    portal2.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+                }
+                rightMBState = true
             }
         }
+        else {rightMBState = false}
 
 
 
@@ -749,7 +759,7 @@ class Scene(private val window: GameWindow) {
 
         }
 
-        //Press the use key
+        //Press the use-key
         if (window.getKeyState(GLFW.GLFW_KEY_E)) {
             if (!eKeyState) {
                 eKeyState = true
@@ -761,6 +771,10 @@ class Scene(private val window: GameWindow) {
             eKeyState = false
         }
 
+        //Reset player position
+        if (window.getKeyState(GLFW.GLFW_KEY_O)) {
+            player?.setPosition(11.7f,1f,57f)
+        }
 
     }
 
