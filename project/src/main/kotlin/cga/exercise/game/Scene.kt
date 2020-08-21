@@ -336,8 +336,6 @@ class Scene(private val window: GameWindow) {
 
     fun render(dt: Float, t: Float) {
 
-
-        //------------------------Nico---------------------//
         //Set the cameras for the two portals
 
         portal1.setCameraParent(portal2, player, cam)
@@ -351,10 +349,12 @@ class Scene(private val window: GameWindow) {
         portal2.setToInitPos()
 
 
-        //Portal 1
+        /*
+        ------------------Portal 1-----------------
+         */
 
+        //render geometry data for portal 1
         gBufferObjectPortal1.startRender(gBufferShader)
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal1.bindPortalCamera(gBufferShader); GLError.checkThrow()
         animatedPlayer.render(gBufferShader, dt)
         buttonStart?.render(gBufferShader)
@@ -379,7 +379,6 @@ class Scene(private val window: GameWindow) {
 
 
         portal1.renderToFramebufferStart(lightningShader)
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal1.bindPortalCameraViewMatrix(lightningShader)
         lightPool.bind(lightningShader)
         lightningShader.setUniform("cellShading", cellShading)
@@ -406,10 +405,12 @@ class Scene(private val window: GameWindow) {
         portal1.renderToFramebufferStop()
 
 
-        //Portal 2
+        /*
+        ------------------Portal 2-----------------
+         */
 
+        //render geometry data for portal 2
         gBufferObjectPortal2.startRender(gBufferShader)
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         portal2.bindPortalCamera(gBufferShader); GLError.checkThrow()
         animatedPlayer.render(gBufferShader, dt)
         buttonStart?.render(gBufferShader)
@@ -463,12 +464,15 @@ class Scene(private val window: GameWindow) {
 
 
 
+        /*
+        ------------------Screen Rendering-----------------
+         */
 
 
-        //Screen rendering
         portal1.setPositionRotationClamp(player!!)
         portal2.setPositionRotationClamp(player!!)
 
+        //render geometry data for normal camera
         gBufferObject.startRender(gBufferShader)
         cam.bind(gBufferShader); GLError.checkThrow()
         portalGun?.render(gBufferShader); GLError.checkThrow()
@@ -492,11 +496,6 @@ class Scene(private val window: GameWindow) {
         screenQuadMesh.render()
         blurFramebuffer.stopRender()
 
-
-
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
-        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
-        glDisable(GL_DEPTH_TEST)
 
         lightningFramebuffer.startRender(lightningShader, gBufferObject, blurFramebuffer)
         lightningShader.use(); GLError.checkThrow()
@@ -557,6 +556,7 @@ class Scene(private val window: GameWindow) {
 
     private var deltaF = 0f;
     private var deltaC = 0f;
+    private var deltaSpotlight = 0f;
 
     //Movement vars
     var k_u = false; var k_d = false; var k_l = false; var k_r = false; var k_a = false //Key directions
@@ -760,6 +760,7 @@ class Scene(private val window: GameWindow) {
         }else if(window.getKeyState(GLFW.GLFW_KEY_9)) {
             currentImage = blurFramebuffer.framebufferTexture
         }
+
         if(window.getKeyState(GLFW.GLFW_KEY_F) && t - deltaF >= 0.5f) {
             deltaF = t
            if(spotLight.color == Vector3i(255, 255, 255))
@@ -772,6 +773,14 @@ class Scene(private val window: GameWindow) {
             deltaC = t
             cellShading = if (cellShading == 1) 0 else 1
 
+        }
+
+        if(window.getKeyState(GLFW.GLFW_KEY_L) &&  t - deltaSpotlight >= 0.5f)
+        {
+            deltaSpotlight = t
+            val newSpotLight = SpotLight(player!!.getWorldPosition(), Vector3i(100 + Random.nextInt(155), 100 + Random.nextInt(155), 100 + Random.nextInt(155)), 16.5f, 20.5f)
+            newSpotLight.setModelMatrix(cam.getWorldModelMatrix())
+            lightPool.add(newSpotLight)
         }
 
         //Press the use-key
