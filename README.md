@@ -24,10 +24,10 @@ Portal 3
 - 3D Level (Janine)
 
 # Steuerung
-MB Left: Blaues Portal
-MB Right: Orangenes Portal
-C: Cell Shading ON/OFF
-F: Taschenlampe ON/OFF
-E: Benutzen-Taste (mit Objekten interagieren)
-W, A, S, D, Space: Movement
-O: Spieler an den Anfang setzen
+- MB Left: Blaues Portal
+- MB Right: Orangenes Portal
+- C: Cell Shading ON/OFF
+- F: Taschenlampe ON/OFF
+- E: Benutzen-Taste (mit Objekten interagieren)
+- W, A, S, D, Space: Movement
+- O: Spieler an den Anfang setzen
