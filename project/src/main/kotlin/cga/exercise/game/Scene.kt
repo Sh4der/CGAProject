@@ -3,6 +3,7 @@ package cga.exercise.game
 import cga.exercise.components.camera.TronCamera
 import cga.exercise.components.framebuffer.SimpleFramebuffer
 import cga.exercise.components.framebuffer.GeometryFramebuffer
+import cga.exercise.components.framebuffer.LightningFramebuffer
 import cga.exercise.components.framebuffer.SSAOTextureFramebuffer
 import cga.exercise.components.gameobjects.*
 import cga.exercise.components.geometry.Material
@@ -69,6 +70,7 @@ class Scene(private val window: GameWindow) {
     private val gBufferObjectPortal1 : GeometryFramebuffer
     private val ssaoTextureFramebufferPortal1 :SSAOTextureFramebuffer
     private val blurFramebufferPortal1 : SimpleFramebuffer
+    private val lightningFramebuffer : LightningFramebuffer
 
     private val gBufferObjectPortal2 : GeometryFramebuffer
     private val ssaoTextureFramebufferPortal2 :SSAOTextureFramebuffer
@@ -256,6 +258,7 @@ class Scene(private val window: GameWindow) {
         gBufferObject = GeometryFramebuffer(window.framebufferWidth, window.framebufferHeight)
         ssaoTextureFramebuffer = SSAOTextureFramebuffer(window.framebufferWidth, window.framebufferHeight)
         blurFramebuffer = SimpleFramebuffer(window.framebufferWidth, window.framebufferHeight)
+        lightningFramebuffer = LightningFramebuffer(window.framebufferWidth, window.framebufferHeight)
         currentImage = blurFramebuffer.framebufferTexture
 
         gBufferObjectPortal1 = GeometryFramebuffer(window.framebufferWidth, window.framebufferHeight)
