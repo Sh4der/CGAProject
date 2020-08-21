@@ -141,7 +141,7 @@ class Scene(private val window: GameWindow) {
         }
         player?.meshes?.get(2)?.material?.emitColor = Vector3f(1f, 0f, 0f)
         player?.scaleLocal(Vector3f(1f))
-        player?.setPosition(11.7f,1f,57f)
+        player?.setPosition(11.7f,1.2637f,57f)
 
         //Load in portal gun
         portalGun = ModelLoader.loadModel("assets/models/Portal Gun/Portal Gun.obj", 0f,0f,0f)
@@ -303,8 +303,8 @@ class Scene(private val window: GameWindow) {
 
         //Add collision from a 3d model
         collisionPool.addCollisionFromObject("assets/models/mainLevel.obj", Vector3f(0f))
-        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f))
-        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(4f,0f,0f))
+        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(-14f,0f,17f))
+        collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(-9f,17f,11f))
 
 
         //Animation test
@@ -317,8 +317,8 @@ class Scene(private val window: GameWindow) {
         buttonStart = ModelLoader.loadModel("assets/models/button.obj", 0f, 0f, 0f)
         buttonEnd = ModelLoader.loadModel("assets/models/button.obj", 0f, 0f, 0f)
 
-        buttonStart?.setPosition(0f,0f,0f)
-        buttonEnd?.setPosition(4f,0f,0f)
+        buttonStart?.setPosition(-14f,0f,17f)
+        buttonEnd?.setPosition(-9f,17f,11f)
 
         for (m in buttonStart?.meshes!!) {
             m.material?.emit = Texture2D("assets/textures/ground_spec.png", true)
@@ -492,32 +492,46 @@ class Scene(private val window: GameWindow) {
         screenQuadMesh.render()
         blurFramebuffer.stopRender()
 
+        /*glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
+        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
+        glDisable(GL_DEPTH_TEST)
+        screenShader.use(); GLError.checkThrow()
+        gBufferObject.gIsPortal.bind(0)
+        screenShader.setUniform("tex", 0)
+        screenQuadMesh.render(); GLError.checkThrow()*/
 
-
-        lightningFramebuffer.startRender(lightningShader, gBufferObject, blurFramebuffer)
-        lightningShader.use(); GLError.checkThrow()
-        cam.bindViewMatrix(lightningShader)
-        lightPool.bind(lightningShader)
-        lightningShader.setUniform("cellShading", cellShading)
-        screenQuadMesh.render(); GLError.checkThrow()
-        lightningFramebuffer.stopRender()
-
-
-        blurFramebuffer.startRender(crosshairShader)
-        lightningFramebuffer.framebufferTexture.bind(0)
-        crosshairShader.setUniform("tex", 0)
-        crosshairShader.setUniform("screenSize", Vector2f(window.framebufferWidth.toFloat(), window.framebufferHeight.toFloat()))
-
-        screenQuadMesh.render()
-        blurFramebuffer.stopRender()
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
         glDisable(GL_DEPTH_TEST)
-        screenShader.use(); GLError.checkThrow()
-        blurFramebuffer.framebufferTexture.bind(0)
-        screenShader.setUniform("tex", 0)
+
+        lightningShader.use(); GLError.checkThrow()
+        cam.bindViewMatrix(lightningShader)
+        lightPool.bind(lightningShader)
+        lightningShader.setUniform("cellShading", cellShading)
+
+        gBufferObject.gPosition.bind(0)
+        lightningShader.setUniform("gPosition", 0)
+        gBufferObject.gNormal.bind(1)
+        lightningShader.setUniform("gNormal", 1)
+        gBufferObject.gDiffTex.bind(2)
+        lightningShader.setUniform("gDiff", 2)
+        gBufferObject.gEmitTex.bind(3)
+        lightningShader.setUniform("gEmit", 3)
+        gBufferObject.gEmitTex.bind(4)
+        lightningShader.setUniform("gSpec", 4)
+        gBufferObject.gShininess.bind(6)
+        lightningShader.setUniform("gShininess", 6)
+        gBufferObject.gEmitColor.bind(6)
+        lightningShader.setUniform("gEmitColor", 6)
+        gBufferObject.gIsPortal.bind(8)
+        lightningShader.setUniform("gIsPortal", 8)
+
+        blurFramebuffer.framebufferTexture.bind(7)
+        lightningShader.setUniform("ssao", 7)
+
         screenQuadMesh.render(); GLError.checkThrow()
+
 
     }
 
@@ -764,6 +778,11 @@ class Scene(private val window: GameWindow) {
 
         //Reset player position
         if (window.getKeyState(GLFW.GLFW_KEY_O)) {
+            player?.setPosition(11.7f,1.2637f,57f)
+        }
+
+        //When player falls into the void
+        if (player?.y()!! < -10) {
             player?.setPosition(11.7f,1f,57f)
         }
 

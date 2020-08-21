@@ -324,13 +324,13 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
         roty = pos.w
 
-        //portalRecCollision = Collision(x-1f, y-3f, z-1f,x+1f, y+1f, z+1f)
-        portalRecCollision.updateCollision(x-1f, y-3f, z-1f,x+1f, y+1f, z+1f)
+        //portalRecCollision.updateCollision(x-1f, y-3f, z-1f,x+1f, y+1f, z+1f)
+        portalRecCollision.updateCollision(x-1f, y-3f, z-1f,x+1f, y, z+1f)
 
         //Check if portal is maybe inside the floor
         val colFloor = level?.checkCollisionWithPortal(this)!!
 
-        if (colFloor.y2 != 0f && colFloor.y2 > y-3) {
+        if (colFloor.y2 != 0f && colFloor.y2 >= y-3f) {
             y = colFloor.y2 + 3f
         }
 
