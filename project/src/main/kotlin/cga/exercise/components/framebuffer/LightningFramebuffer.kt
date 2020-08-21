@@ -18,18 +18,29 @@ class LightningFramebuffer(_weight : Int, _height : Int) : Framebuffer(_weight, 
      * @param shader ShaderProgram
      * @param gFramebuffer GeometryFramebuffer
      */
-    fun startRender(shader : ShaderProgram, ssaoSamples : Int, gPosition : Texture2D, gNormal : Texture2D, texNoise : Texture2D)
+    fun startRender(shader : ShaderProgram, gBufferObject : GeometryFramebuffer, blurFramebuffer : SimpleFramebuffer)
     {
         startRender(shader)
-        gPosition.bind(0)
+        gBufferObject.gPosition.bind(0)
         shader.setUniform("gPosition", 0)
-       gNormal.bind(1)
+        gBufferObject.gNormal.bind(1)
         shader.setUniform("gNormal", 1)
-        texNoise.bind(2)
-        shader.setUniform("texNoise", 2)
+        gBufferObject.gDiffTex.bind(2)
+        shader.setUniform("gDiff", 2)
+        gBufferObject.gEmitTex.bind(3)
+        shader.setUniform("gEmit", 3)
+        gBufferObject.gEmitTex.bind(4)
+        shader.setUniform("gSpec", 4)
+        gBufferObject.gShininess.bind(6)
+        shader.setUniform("gShininess", 6)
+        gBufferObject.gEmitColor.bind(6)
+        shader.setUniform("gEmitColor", 6)
+        gBufferObject.gIsPortal.bind(8)
+        shader.setUniform("gIsPortal", 8)
 
-        shader.setUniform("screenSize", Vector2f(width.toFloat(), height.toFloat())); GLError.checkThrow()
-        shader.setUniform("samples", ssaoSamples); GLError.checkThrow()
+        blurFramebuffer.framebufferTexture.bind(7)
+        shader.setUniform("ssao", 7)
+
     }
 
     /**

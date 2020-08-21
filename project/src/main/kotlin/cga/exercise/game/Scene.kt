@@ -41,6 +41,7 @@ class Scene(private val window: GameWindow) {
     private val blurShader : ShaderProgram
     private val lightningShader : ShaderProgram
     private val portalShader : ShaderProgram
+    private val crosshairShader : ShaderProgram
 
     private val cam : TronCamera
     private val camOverview : TronCamera
@@ -122,6 +123,7 @@ class Scene(private val window: GameWindow) {
         lightningShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/ssaoLightning_frag.glsl")
         screenShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/screen_frag.glsl")
         portalShader = ShaderProgram("assets/shaders/portal_vert.glsl", "assets/shaders/portal_frag.glsl")
+        crosshairShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/crosshairShader_frag.glsl")
 
         //Create the mesh
         val stride: Int = 8 * 4
@@ -300,7 +302,7 @@ class Scene(private val window: GameWindow) {
 
 
         //Add collision from a 3d model
-        collisionPool.addCollisionFromObject("assets/models/test_level2.obj", Vector3f(0f))
+        collisionPool.addCollisionFromObject("assets/models/mainLevel.obj", Vector3f(0f))
         collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f))
         collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(4f,0f,0f))
 
@@ -490,46 +492,32 @@ class Scene(private val window: GameWindow) {
         screenQuadMesh.render()
         blurFramebuffer.stopRender()
 
-        /*glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
-        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
-        glDisable(GL_DEPTH_TEST)
-        screenShader.use(); GLError.checkThrow()
-        gBufferObject.gIsPortal.bind(0)
-        screenShader.setUniform("tex", 0)
-        screenQuadMesh.render(); GLError.checkThrow()*/
 
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
-        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
-        glDisable(GL_DEPTH_TEST)
-
+        lightningFramebuffer.startRender(lightningShader, gBufferObject, blurFramebuffer)
         lightningShader.use(); GLError.checkThrow()
         cam.bindViewMatrix(lightningShader)
         lightPool.bind(lightningShader)
         lightningShader.setUniform("cellShading", cellShading)
-
-        gBufferObject.gPosition.bind(0)
-        lightningShader.setUniform("gPosition", 0)
-        gBufferObject.gNormal.bind(1)
-        lightningShader.setUniform("gNormal", 1)
-        gBufferObject.gDiffTex.bind(2)
-        lightningShader.setUniform("gDiff", 2)
-        gBufferObject.gEmitTex.bind(3)
-        lightningShader.setUniform("gEmit", 3)
-        gBufferObject.gEmitTex.bind(4)
-        lightningShader.setUniform("gSpec", 4)
-        gBufferObject.gShininess.bind(6)
-        lightningShader.setUniform("gShininess", 6)
-        gBufferObject.gEmitColor.bind(6)
-        lightningShader.setUniform("gEmitColor", 6)
-        gBufferObject.gIsPortal.bind(8)
-        lightningShader.setUniform("gIsPortal", 8)
-
-        blurFramebuffer.framebufferTexture.bind(7)
-        lightningShader.setUniform("ssao", 7)
-
         screenQuadMesh.render(); GLError.checkThrow()
+        lightningFramebuffer.stopRender()
 
+
+        blurFramebuffer.startRender(crosshairShader)
+        lightningFramebuffer.framebufferTexture.bind(0)
+        crosshairShader.setUniform("tex", 0)
+        crosshairShader.setUniform("screenSize", Vector2f(window.framebufferWidth.toFloat(), window.framebufferHeight.toFloat()))
+
+        screenQuadMesh.render()
+        blurFramebuffer.stopRender()
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
+        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
+        glDisable(GL_DEPTH_TEST)
+        screenShader.use(); GLError.checkThrow()
+        blurFramebuffer.framebufferTexture.bind(0)
+        screenShader.setUniform("tex", 0)
+        screenQuadMesh.render(); GLError.checkThrow()
 
     }
 
