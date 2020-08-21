@@ -15,6 +15,8 @@ import cga.framework.ModelLoader
 import cga.framework.OBJLoader
 import org.joml.*
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL43
+import java.nio.ByteBuffer
 import kotlin.math.pow
 import kotlin.system.exitProcess
 
@@ -29,7 +31,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     - Function to generate current Material (Texture from camera)
     */
 
-    private var framebuffer : SimpleFramebuffer
+    var framebuffer : SimpleFramebuffer
     private var portalCamTexture : Texture2D
     private var portalMaterial : Material
     private var portalMaterialCam : Material
@@ -46,7 +48,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     var goingOutCoord = Vector3f(0f)
 
     private var initSet = Vector4f(x,y,z,roty)
-
+    //private val texture :Texture2D
 
     init {
         //Create the mesh
@@ -60,8 +62,12 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         //Create Framebuffer
         framebuffer = SimpleFramebuffer(window.framebufferWidth, window.framebufferHeight)
 
+        /*texture = Texture2D(null as ByteBuffer?, framebuffer.width, framebuffer.height, false)
+        texture.setTexParams(GL11.GL_NEAREST, GL11.GL_NEAREST)*/
+
         //Use Ground Textures as default textures, 'cause I'm too lazy to create default portal textures
         portalCamTexture = Texture2D("assets/textures/ground_diff.png", true)
+        //portalMaterial = Material(texture, Texture2D("assets/textures/con_wall_1_emit.png", false), texture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
         portalMaterial = Material(framebuffer.framebufferTexture, Texture2D("assets/textures/con_wall_1_emit.png", false), framebuffer.framebufferTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
         portalMaterial.emitColor = Vector3f(1f)
         portalMaterialCam = Material(portalCamTexture, portalCamTexture, portalCamTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
@@ -107,6 +113,16 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
         //Rectangle Collision
         portalRecCollision = Collision(x-1f, y-1f, z-1f,x+1f, y+1f, z+1f)
+    }
+
+    /**
+     * sets the texture of the portal
+     * @param texture Texture2D
+     */
+    fun setTexture(texture : Texture2D)
+    {
+        portalMaterial.diff = texture
+        portalMaterial.specular = texture
     }
 
     // Set Camera Parents is now reworked and does something different.
@@ -273,6 +289,9 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalWall.render(shaderProgram)
         shaderProgram.setUniform("isPortal", 0.0f)
         portalFrame?.render(shaderProgram)
+
+        /*GL43.glCopyImageSubData(framebuffer.framebufferTexture.texID, GL11.GL_TEXTURE_2D, 0, 0, 0, 0,
+                texture.texID, GL11.GL_TEXTURE_2D, 0, 0, 0, 0, framebuffer.width, framebuffer.height, 1); GLError.checkThrow()*/
 
         //Only for debugging
         //portalCam.render(shaderProgram) //This is not a camera, but rather a 3d object that shows the position and rotation of the camera. Used for debugging.

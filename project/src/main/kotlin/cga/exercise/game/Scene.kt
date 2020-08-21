@@ -30,6 +30,7 @@ import kotlin.random.Random
 import kotlin.system.exitProcess
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.nio.ByteBuffer
 
 
 class Scene(private val window: GameWindow) {
@@ -82,6 +83,9 @@ class Scene(private val window: GameWindow) {
     private val gBufferObjectPortal2 : GeometryFramebuffer
     private val ssaoTextureFramebufferPortal2 :SSAOTextureFramebuffer
     private val blurFramebufferPortal2 : SimpleFramebuffer
+    private val oldTexturePortal1 : SimpleFramebuffer
+    private val oldTexturePortal2 : SimpleFramebuffer
+
 
 
     //Portal vars
@@ -100,6 +104,8 @@ class Scene(private val window: GameWindow) {
 
     //Collisions
     private val collisionPool = CollisionPool()
+
+
 
     //scene setup
     init {
@@ -277,10 +283,16 @@ class Scene(private val window: GameWindow) {
         ssaoTextureFramebufferPortal2 = SSAOTextureFramebuffer(window.framebufferWidth, window.framebufferHeight)
         blurFramebufferPortal2 = SimpleFramebuffer(window.framebufferWidth, window.framebufferHeight)
 
+        oldTexturePortal1 = SimpleFramebuffer(window.framebufferWidth, window.framebufferHeight)
+        oldTexturePortal2 = SimpleFramebuffer(window.framebufferWidth, window.framebufferHeight)
+
 
         //Portal Setup
         portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), 999f, 999f, -0.235f, 0f, 270f, 0f)
         portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 999f, 999f, 5f, 0f, 180f, 0f)
+
+
+
 
 
         rob = ModelLoader.loadModel("assets/models/kugel.obj", 0f, 0f, 0f)
@@ -362,6 +374,7 @@ class Scene(private val window: GameWindow) {
         testLevel?.renderWithPortalCheck(gBufferShader, portal2)
         portalGunPortal1?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
+        portal1.setTexture(oldTexturePortal1.framebufferTexture)
         portal1.renderWithPortalCheck(gBufferShader, portal2)
         glEnable(GL_CULL_FACE)
         gBufferObjectPortal1.stopRender()
@@ -376,7 +389,6 @@ class Scene(private val window: GameWindow) {
         blurShader.setUniform("ssaoInput", 0)
         screenQuadMesh.render()
         blurFramebufferPortal1.stopRender()
-
 
         portal1.renderToFramebufferStart(lightningShader)
         portal1.bindPortalCameraViewMatrix(lightningShader)
@@ -401,8 +413,17 @@ class Scene(private val window: GameWindow) {
 
         blurFramebufferPortal1.framebufferTexture.bind(7)
         lightningShader.setUniform("ssao", 7)
+
         screenQuadMesh.render(); GLError.checkThrow()
         portal1.renderToFramebufferStop()
+
+
+        //save old portal texture
+        oldTexturePortal1.startRender(screenShader)
+        portal1.framebuffer.framebufferTexture.bind(0)
+        screenShader.setUniform("tex", 0)
+        screenQuadMesh.render()
+        oldTexturePortal1.stopRender()
 
 
         /*
@@ -418,6 +439,7 @@ class Scene(private val window: GameWindow) {
         testLevel?.renderWithPortalCheck(gBufferShader, portal1)
         portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
+        portal2.setTexture(oldTexturePortal2.framebufferTexture)
         portal2.renderWithPortalCheck(gBufferShader, portal1)
         glEnable(GL_CULL_FACE)
         gBufferObjectPortal2.stopRender()
@@ -462,6 +484,11 @@ class Scene(private val window: GameWindow) {
         portal2.renderToFramebufferStop()
 
 
+        oldTexturePortal2.startRender(screenShader)
+        portal2.framebuffer.framebufferTexture.bind(0)
+        screenShader.setUniform("tex", 0)
+        screenQuadMesh.render()
+        oldTexturePortal2.stopRender()
 
 
         /*
@@ -480,6 +507,9 @@ class Scene(private val window: GameWindow) {
         buttonStart?.render(gBufferShader)
         buttonEnd?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
+        portal1.setTexture(portal1.framebuffer.framebufferTexture)
+        portal2.setTexture(portal2.framebuffer.framebufferTexture)
+
         portal1.render(gBufferShader)
         portal2.render(gBufferShader)
         glEnable(GL_CULL_FACE)
@@ -538,7 +568,7 @@ class Scene(private val window: GameWindow) {
         glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
         glDisable(GL_DEPTH_TEST)
         screenShader.use(); GLError.checkThrow()
-        blurFramebuffer.framebufferTexture.bind(0)
+        currentImage.bind(0)
         screenShader.setUniform("tex", 0)
         screenQuadMesh.render(); GLError.checkThrow()
 
@@ -759,6 +789,8 @@ class Scene(private val window: GameWindow) {
             currentImage = ssaoTextureFramebuffer.ssaoColorTexture
         }else if(window.getKeyState(GLFW.GLFW_KEY_9)) {
             currentImage = blurFramebuffer.framebufferTexture
+        } else if(window.getKeyState(GLFW.GLFW_KEY_0)) {
+            currentImage = oldTexturePortal1.framebufferTexture
         }
 
         if(window.getKeyState(GLFW.GLFW_KEY_F) && t - deltaF >= 0.5f) {
@@ -783,6 +815,7 @@ class Scene(private val window: GameWindow) {
             lightPool.add(newSpotLight)
         }
 
+
         //Press the use-key
         if (window.getKeyState(GLFW.GLFW_KEY_E)) {
             if (!eKeyState) {
@@ -799,6 +832,7 @@ class Scene(private val window: GameWindow) {
         if (window.getKeyState(GLFW.GLFW_KEY_O)) {
             player?.setPosition(11.7f,1.2637f,57f)
         }
+
 
         //When player falls into the void
         if (player?.y()!! < -10) {
