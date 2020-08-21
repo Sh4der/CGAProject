@@ -492,19 +492,13 @@ class Scene(private val window: GameWindow) {
         screenQuadMesh.render()
         blurFramebuffer.stopRender()
 
-        /*glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
-        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
-        glDisable(GL_DEPTH_TEST)
-        screenShader.use(); GLError.checkThrow()
-        gBufferObject.gIsPortal.bind(0)
-        screenShader.setUniform("tex", 0)
-        screenQuadMesh.render(); GLError.checkThrow()*/
 
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
         glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
         glDisable(GL_DEPTH_TEST)
 
+        lightningFramebuffer.startRender(lightningShader, gBufferObject, blurFramebuffer)
         lightningShader.use(); GLError.checkThrow()
         cam.bindViewMatrix(lightningShader)
         lightPool.bind(lightningShader)
@@ -531,7 +525,23 @@ class Scene(private val window: GameWindow) {
         lightningShader.setUniform("ssao", 7)
 
         screenQuadMesh.render(); GLError.checkThrow()
+        lightningFramebuffer.stopRender()
 
+        blurFramebuffer.startRender(crosshairShader)
+        lightningFramebuffer.framebufferTexture.bind(0)
+        crosshairShader.setUniform("tex", 0)
+        crosshairShader.setUniform("screenSize", Vector2f(window.framebufferWidth.toFloat(), window.framebufferHeight.toFloat()))
+        screenQuadMesh.render()
+        blurFramebuffer.stopRender()
+
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); GLError.checkThrow()
+        glClear(GL_COLOR_BUFFER_BIT); GLError.checkThrow()
+        glDisable(GL_DEPTH_TEST)
+        screenShader.use(); GLError.checkThrow()
+        blurFramebuffer.framebufferTexture.bind(0)
+        screenShader.setUniform("tex", 0)
+        screenQuadMesh.render(); GLError.checkThrow()
 
     }
 
