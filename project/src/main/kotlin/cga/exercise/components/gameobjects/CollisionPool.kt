@@ -50,21 +50,12 @@ class CollisionPool {
         return false
     }
 
-    fun addCollisionFromObject(path: String, rot: Vector3f) {
-
-        // Create textures to compare with meshs' current texture and define if a portal can be created on this mesh or not.
-        // Doesn't work at the moment
-        val diffTex = Texture2D("assets/textures/con_wall_1.png", true)
-        diffTex.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_NEAREST, GL11.GL_NEAREST)
-
-        val diffTexMetal1 = Texture2D("assets/textures/metal_floor.png", true)
-        diffTexMetal1.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_NEAREST, GL11.GL_NEAREST)
-
+    fun addCollisionFromObject(path: String, rot: Vector3f, pos: Vector3f? = null) {
 
         val obj = ModelLoader.loadModel(path, rot.x, rot.y, rot.z)
 
-        println("SIZE ${obj?.meshes?.size}")
-        println("SIZE ${obj?.meshes?.get(0)?.vertexdata?.size}")
+        //println("SIZE ${obj?.meshes?.size}")
+        //println("SIZE ${obj?.meshes?.get(0)?.vertexdata?.size}")
 
         var meshNumber = 0
         for (m in obj?.meshes!!) {
@@ -98,7 +89,13 @@ class CollisionPool {
                 }
             }
 
-            println(lowest)
+            if (pos != null) {
+                lowest.x+=pos.x
+                lowest.y+=pos.y
+                lowest.z+=pos.z
+            }
+
+
 
             var biggest = Vector3f(-9999f)
             var biggestSample = Vector3f(-9999f)
@@ -129,14 +126,15 @@ class CollisionPool {
                 }
             }
 
-            println(biggest)
+
+            if (pos != null) {
+                biggest.x+=pos.x
+                biggest.y+=pos.y
+                biggest.z+=pos.z
+            }
+
 
             var portalable = true
-            /*if (obj?.meshes?.get(0)?.material?.diff) {
-                portalable = false
-                println("#########################")
-            }*/
-            //addCollision(lowest.x, lowest.y, lowest.z, biggest.x, biggest.y, biggest.z)
             addCollision(Collision(lowest.x, lowest.y, lowest.z, biggest.x, biggest.y, biggest.z, portalable))
 
             meshNumber++

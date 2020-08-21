@@ -224,7 +224,6 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
             val loc = GL20.glGetUniformLocation(programID, name)
             if(loc != -1)
                 uniformLocations[name] = loc
-            println("${uniformLocations[name]} : $name")
             return loc
         }
     }
