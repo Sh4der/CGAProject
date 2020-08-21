@@ -205,14 +205,15 @@ class Scene(private val window: GameWindow) {
         //pointLight.parent = player
         //lightpool.add(pointLight)
 
-        for (i in 0..20)
+
+        for (i in 0..40)
         {
-            val light = PointLight(Vector3f((Random.nextFloat() * 2.0f - 1.0f) * 20f, 1f, (Random.nextFloat() * 2.0f - 1.0f) * 20f), Vector3i(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255)))
+            val light = PointLight(Vector3f((Random.nextFloat() * 2.0f - 1.0f) * 20f, 1f, (Random.nextFloat() * 2.0f - 1.0f) * 40f), Vector3i(100 + Random.nextInt(155), 100 + Random.nextInt(155), 100 + Random.nextInt(155)))
             lightPool.add(light)
         }
-        for (i in 0..30)
+        for (i in 0..20)
         {
-            val light = SpotLight(Vector3f((Random.nextFloat() * 2.0f - 1.0f) * 20f, (Random.nextFloat() * 2.0f - 1.0f) * 20f, (Random.nextFloat() * 2.0f - 1.0f) * 20f), Vector3i(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255)), 16.5f, 20.5f)
+            val light = SpotLight(Vector3f((Random.nextFloat() * 2.0f - 1.0f) * 20f, (Random.nextFloat() * 2.0f - 1.0f) * 40f, (Random.nextFloat() * 2.0f - 1.0f) * 20f), Vector3i(100 + Random.nextInt(155), 100 + Random.nextInt(155), 100 + Random.nextInt(155)), 16.5f, 20.5f)
             light.rotateLocal((Random.nextFloat() * 2.0f - 1.0f) * 360f, (Random.nextFloat() * 2.0f - 1.0f) * 360f, (Random.nextFloat() * 2.0f - 1.0f) * 360f)
             lightPool.add(light)
         }
@@ -222,7 +223,7 @@ class Scene(private val window: GameWindow) {
         spotLightPortal1 = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
         spotLightPortal2 = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
 
-        spotLight.parent = player
+        spotLight.parent = cam
         lightPool.add(spotLight)
 
 
@@ -282,14 +283,14 @@ class Scene(private val window: GameWindow) {
         rob?.meshes?.get(0)?.material?.specular = specTex
         rob?.meshes?.get(0)?.material?.diff = diffTex
 
-        testLevel = ModelLoader.loadModel("assets/models/test_level2.obj", 0f, 0f, 0f)
+        testLevel = ModelLoader.loadModel("assets/models/mainLevel.obj", 0f, 0f, 0f)
         testLevel?.setEmitColor(Vector3f(1f))
         for (m in testLevel?.meshes!!) {
             m.material?.emit = emitTex
             m.material?.specular = specTex
             m.material?.diff = diffTex
             //m.material?.tcMultiplier = Vector2f(m.getHeight(), Math.max(m.getDepth(), m.getWidth()))
-            m.material = Material(Texture2D("assets/textures/con_wall_1.png", true), Texture2D("assets/textures/con_wall_1_emit.png", false), Texture2D("assets/textures/con_wall_1.png", true), 60f, Vector2f(m.getHeight()*4, Math.max(m.getDepth(), m.getWidth())*4));
+            //m.material = Material(Texture2D("assets/textures/con_wall_1.png", true), Texture2D("assets/textures/con_wall_1_emit.png", false), Texture2D("assets/textures/con_wall_1.png", true), 60f, Vector2f(m.getHeight() * 4, Math.max(m.getDepth(), m.getWidth()) * 4));
         }
 
         //Add collisions
@@ -297,7 +298,7 @@ class Scene(private val window: GameWindow) {
         //collisionPool.addCollision(-22f,0f,-1f,22f,22f,0f)
         //collisionPool.addCollision(8f,0f,-22f,10f,22f,22f)
         //Add collision from a 3d model
-        collisionPool.addCollisionFromObject("assets/models/test_level2.obj", Vector3f(0f))
+        collisionPool.addCollisionFromObject("assets/models/mainLevel.obj", Vector3f(0f))
 
 
 

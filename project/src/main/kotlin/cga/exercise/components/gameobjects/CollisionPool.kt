@@ -52,7 +52,7 @@ class CollisionPool {
 
     fun addCollisionFromObject(path: String, rot: Vector3f) {
 
-        // Create textures to compare with meshs' current texture and define if a portal can be created on this mesh or not.
+        // Create textures to compare with meshes' current texture and define if a portal can be created on this mesh or not.
         // Doesn't work at the moment
         val diffTex = Texture2D("assets/textures/con_wall_1.png", true)
         diffTex.setTexParams(GL11.GL_REPEAT, GL11.GL_REPEAT, GL11.GL_NEAREST, GL11.GL_NEAREST)

@@ -4,7 +4,6 @@ import org.joml.*
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
-import org.lwjgl.system.MemoryStack
 import java.nio.FloatBuffer
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -13,7 +12,7 @@ import java.nio.file.Paths
  * Created by Fabian on 16.09.2017.
  */
 class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
-    private val uniformLocations = HashMap<String, Int>()
+    private val uniformLocationCache = HashMap<String, Int>()
 
     private var programID: Int = 0
     //Matrix buffers for setting matrix uniforms. Prevents allocation for each uniform
@@ -217,14 +216,14 @@ class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
 
     private fun getUniformLocation(programID : Int, name : String) : Int
     {
-        if(uniformLocations.containsKey(name))
-            return uniformLocations[name] as Int
+        if(uniformLocationCache.containsKey(name))
+            return uniformLocationCache[name] as Int
         else
         {
             val loc = GL20.glGetUniformLocation(programID, name)
             if(loc != -1)
-                uniformLocations[name] = loc
-            println("${uniformLocations[name]} : $name")
+                uniformLocationCache[name] = loc
+            //println("${uniformLocationCache[name]} : $name")
             return loc
         }
     }
