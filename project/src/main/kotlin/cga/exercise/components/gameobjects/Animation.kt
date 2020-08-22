@@ -17,7 +17,8 @@ class Animation(val path: String, val startNumber: Int, val endNumber: Int, var 
     // Load in all the obj files for every "frame"
     init {
         for (i in startNumber .. endNumber) {
-            animationList.add(ModelLoader.loadModel("${path}${i}.obj", Math.toRadians(rotx), Math.toRadians(roty), Math.toRadians(rotz)))
+            animationList.add(ModelLoader.loadModel("${path}${i}.obj",
+                    Math.toRadians(rotx), Math.toRadians(roty), Math.toRadians(rotz)))
         }
     }
 
@@ -25,15 +26,6 @@ class Animation(val path: String, val startNumber: Int, val endNumber: Int, var 
     fun render(shaderProgram: ShaderProgram, dt: Float) {
         if (movement) {
             animationList[currentFrame]?.render(shaderProgram)
-            /*if (renderCycle == 0) {
-                currentFrame++
-            } else if (renderCycle >= 3) {
-                renderCycle = -1
-            }
-            renderCycle++
-            if (currentFrame > endNumber) {
-                currentFrame = startNumber
-            }*/
         }
         else {
             animationList[5]?.render(shaderProgram)
