@@ -74,15 +74,15 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalMaterialCam = Material(portalCamTexture, portalCamTexture, portalCamTexture, 1000f, Vector2f(1.0f, 1.0f)); GLError.checkThrow()
         portalMaterialCam.emitColor = Vector3f(1f)
 
+        portalWall = ModelLoader.loadModel("assets/models/portal/portal_flat.obj", 0f,0f,0f)!! //Renderable(mutableListOf(meshPortalWall))
+        portalWall.setEmitColor(Vector3f(1f))
+        portalWall.meshes.get(0).material = portalMaterial
+
+        //Portl Cam renders an object on the position of the portal camera. This is just used for debugging.
         //load an object and create a mesh
-        val resPortalWall : OBJLoader.OBJResult = OBJLoader.loadOBJ("assets/models/portal/portal.obj")
-
+        val resPortalWall : OBJLoader.OBJResult = OBJLoader.loadOBJ("assets/models/portal/portal_flat.obj")
         val portalWallMesh: OBJLoader.OBJMesh = resPortalWall.objects[0].meshes[0]
-        val meshPortalWall = Mesh(portalWallMesh.vertexData, portalWallMesh.indexData, vertexAttributes, portalMaterial)
         val meshPortalWallCam = Mesh(portalWallMesh.vertexData, portalWallMesh.indexData, vertexAttributes, portalMaterialCam)
-
-        portalWall = Renderable(mutableListOf(meshPortalWall))
-
         portalCam = Renderable(mutableListOf(meshPortalWallCam)) //For visualizing the camera for each portal
         portalCam.meshes[0].material?.emitColor = Vector3f(frameColor)
 
@@ -93,16 +93,14 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalFrame?.meshes?.get(0)?.material?.emit = Texture2D("assets/textures/ground_diff.png", false)
         portalFrame?.meshes?.get(0)?.material?.specular = Texture2D("assets/textures/ground_diff.png", false)
 
-        portalWallScale = 0.0f
+        portalWallScale = 0.0f //This is used for the scaling animation of the portal
         //Portal & Frame transformation
         portalWall.rotateLocal(rotx,roty,rotz)
         portalWall.translateGlobal(Vector3f(x,y,z))
-        //portalWall.scaleLocal(Vector3f(1.18f, 0.81f, 0.81f))
         portalWall.scaleLocal(Vector3f(1.18f, 0.01f+portalWallScale, 0.0f+portalWallScale))
 
         portalFrame?.rotateLocal(rotx,roty,rotz)
         portalFrame?.translateGlobal(Vector3f(x,y,z))
-        //portalFrame?.scaleLocal(Vector3f(0.8f, 0.8f, 0.8f))
         portalFrame?.scaleLocal(Vector3f(0.8f, portalWallScale, portalWallScale))
 
         //Define camera

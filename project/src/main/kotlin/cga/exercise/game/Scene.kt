@@ -363,6 +363,7 @@ class Scene(private val window: GameWindow) {
          */
 
         //render geometry data for portal 1
+
         gBufferObjectPortal1.startRender(gBufferShader)
         portal1.bindPortalCamera(gBufferShader); GLError.checkThrow()
         animatedPlayer.render(gBufferShader, dt)
