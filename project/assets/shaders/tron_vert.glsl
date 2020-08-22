@@ -33,13 +33,14 @@ out vec3 toSpotLight;
 out vec3 toCamera;
 out mat4 passInverseTransposeViewMatrix;
 out vec3 viewSpotLightDirection;
-
+out mat4 inverseTransposeViewMatrixToFragment;
 
 void main(){
     vec4 pos = vec4(position, 1.0f);
     vec4 worldPosition = model_matrix * pos;
     vec4 positionInCameraSpace = view_matrix * worldPosition;
     mat4 inverseTransposeViewMatrix = inverse(transpose(view_matrix));
+    inverseTransposeViewMatrixToFragment = inverseTransposeViewMatrix;
 
     gl_Position = projection_matrix * positionInCameraSpace;
 
@@ -50,8 +51,7 @@ void main(){
 
     vertexData.normal = (inverseTransposeViewMatrix * model_matrix * vec4(normal, 0.0f)).xyz;
 
-    toLight = (inverseTransposeViewMatrix * vec4(pointLightPosition, 1.0f)).xyz - (inverseTransposeViewMatrix * worldPosition).xyz;
-    toSpotLight = (inverseTransposeViewMatrix * vec4(spotLightPosition, 1.0f)).xyz - (inverseTransposeViewMatrix * worldPosition).xyz;
+
     toCamera = - positionInCameraSpace.xyz;
     viewSpotLightDirection = (inverseTransposeViewMatrix * vec4(spotLightDirection, 0.0f)).xyz;
 }
