@@ -8,6 +8,7 @@ import java.util.*
 
 class Collision (var x1: Float, var y1: Float, var z1: Float, var x2: Float, var y2: Float, var z2: Float, val portalable : Boolean? = null) {
 
+    // Updates the collision mask points
     fun updateCollision(newx1: Float, newy1: Float, newz1: Float, newx2: Float, newy2: Float, newz2: Float) {
         x1 = newx1
         x2 = newx2
@@ -17,6 +18,7 @@ class Collision (var x1: Float, var y1: Float, var z1: Float, var x2: Float, var
         z2 = newz2
     }
 
+    // Checks point in 3d box collision
     fun checkPointCollision(check_x: Float, check_y: Float, check_z: Float) : Boolean {
         if (check_x >= x1 && check_x <= x2
                 && check_y >= y1 && check_y < y2
@@ -27,6 +29,7 @@ class Collision (var x1: Float, var y1: Float, var z1: Float, var x2: Float, var
         return false
     }
 
+    // Checks rectangle in rectangle collsion (3d Box)
     fun checkRectangleCollision(col: Collision) : Boolean {
         if (!(col.x1 >= this.x2 || this.x1 >= col.x2) &&! (col.y1 >= this.y2 || this.y1 >= col.y2) && !(col.z1 >= this.z2 || this.z1 >= col.z2)) {
             return true
@@ -34,6 +37,7 @@ class Collision (var x1: Float, var y1: Float, var z1: Float, var x2: Float, var
         return false
     }
 
+    // Generates Collision Mask from Mesh
     fun createCollisionFromMesh(mesh: Mesh) {
 
         var lowest = Vector3f(9999f)
@@ -103,10 +107,11 @@ class Collision (var x1: Float, var y1: Float, var z1: Float, var x2: Float, var
 
     }
 
+    // Calculates the side on the wall, which the portal is being shot on
     fun getCollisionSide(check_x: Float, check_y: Float, check_z: Float, startx: Float, starty: Float, startz: Float) : Vector2f { //Returns degrees for portal rotation
         /*              TOP
                  |---------------------------------------------------|
-          LEFT  |  |---------------------------------------------|  |  RIGHT
+          LEFT  |  |---------------------------------------------|  |  RIGHT    <---- Wall
                 |---------------------------------------------------|
                         BOTTOM
         */

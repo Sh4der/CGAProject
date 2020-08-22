@@ -52,14 +52,6 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     //private val texture :Texture2D
 
     init {
-        //Create the mesh
-        val stride: Int = 8 * 4
-        val attrPos = VertexAttribute(3, GL11.GL_FLOAT, stride, 0) //position
-        val attrTC = VertexAttribute(2, GL11.GL_FLOAT, stride, 3 * 4) //textureCoordinate
-        val attrNorm = VertexAttribute(3, GL11.GL_FLOAT, stride, 5 * 4) //normalval
-        val vertexAttributes = arrayOf<VertexAttribute>(attrPos, attrTC, attrNorm)
-
-
         //Create Framebuffer
         framebuffer = SimpleFramebuffer(window.framebufferWidth, window.framebufferHeight)
 
@@ -79,7 +71,12 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalWall.meshes.get(0).material = portalMaterial
 
         //Portl Cam renders an object on the position of the portal camera. This is just used for debugging.
-        //load an object and create a mesh
+        //load an object and create a mesh -> OLD CODE, BUT IT WORKS!
+        val stride: Int = 8 * 4
+        val attrPos = VertexAttribute(3, GL11.GL_FLOAT, stride, 0) //position
+        val attrTC = VertexAttribute(2, GL11.GL_FLOAT, stride, 3 * 4) //textureCoordinate
+        val attrNorm = VertexAttribute(3, GL11.GL_FLOAT, stride, 5 * 4) //normalval
+        val vertexAttributes = arrayOf<VertexAttribute>(attrPos, attrTC, attrNorm)
         val resPortalWall : OBJLoader.OBJResult = OBJLoader.loadOBJ("assets/models/portal/portal_flat.obj")
         val portalWallMesh: OBJLoader.OBJMesh = resPortalWall.objects[0].meshes[0]
         val meshPortalWallCam = Mesh(portalWallMesh.vertexData, portalWallMesh.indexData, vertexAttributes, portalMaterialCam)
@@ -127,17 +124,17 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalMaterial.specular = texture
     }
 
-    // Set Camera Parents is now reworked and does something different.
     // It sets the position & rotation of the portal cameras (relative to player and portal position)
-    fun setCameraParent(p: Portal, c: Renderable?, playerCam: TronCamera) {
+    fun updatePortalSettings(p: Portal, c: Renderable?, playerCam: TronCamera) {
         val pWorldPos = p.portalWall.getWorldPosition()
         val playerWorldPos = c?.getWorldPosition()
         if (playerWorldPos == null) {
             exitProcess(0)
         }
         else {
+
             /*
-            Set Portal Cam with Matrix Multiplication -> I can't make it work...
+            //Set Portal Cam with Matrix Multiplication -> I can't make it work...
             val otherPortalMatrix = Matrix4f(p.getWorldModelMatrix())
             val otherPortalMatrix2 = Matrix4f(p.getWorldModelMatrix())
             val myPortalMatrix = Matrix4f(portalWall.getWorldModelMatrix())
@@ -155,9 +152,11 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
             */
 
 
-            // Very messy portal-player transition code, but it works.
+            // Place portal camera in the correct position
+
             var rangecheck = 1
 
+            // Check which portal is further to the middle, to determine in what relative position they stay
             if (pointDistance(portalWall.getWorldPosition().x, portalWall.getWorldPosition().y, 0f,0f) < pointDistance(pWorldPos.x, pWorldPos.y, 0f, 0f)) {
                 rangecheck = -1
             }
@@ -172,8 +171,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
             val checkdir = ((p.roty - roty) + (180 * rangecheck)).toInt()
 
-            //println(camdir)
-
+            // Offset for teleporting the player -> Further out the portal
             var camOffsetx = 0f
             var camOffsetz = 0f
             val offsetConst = 0.7f
@@ -195,6 +193,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
                 camOffsetz = -offsetConst
             }
 
+            // Set the correct portal camera position based on the difference in rotation between the two portals
             if (checkdir == 0 || checkdir == 360 || checkdir == -360) {
                 val setx = playerWorldPos.x - portalWall.getWorldPosition().x + pWorldPos.x + camOffsetx
                 val setz = playerWorldPos.z - portalWall.getWorldPosition().z + pWorldPos.z + camOffsetz
@@ -313,6 +312,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         }
     }
 
+    // Renders only the portal frame (not used right now)
     fun renderFrameOnly(shaderProgram: ShaderProgram) {
         shaderProgram.use()
 
@@ -331,6 +331,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         return false
     }
 
+    // Check if the player is near the portal, but not inside
     fun checkAlmostCollision(check_x: Float, check_y: Float, check_z: Float) : Boolean {
         if (check_x >= collisionAlmostBox3Dp1.x && check_x <= collisionAlmostBox3Dp2.x
                 && check_y >= collisionAlmostBox3Dp1.y && check_y <= collisionAlmostBox3Dp2.y
@@ -341,8 +342,10 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         return false
     }
 
+    // Returns distance from point a to point b in 2d
     fun pointDistance(x1: Float, y1: Float, x2: Float, y2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2))
 
+    // Set the position and rotation of the portal
     fun setPositionRotation(pos: Vector4f, colPool: CollisionPool, level: Renderable?) {
 
         initSet = pos
@@ -379,7 +382,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         //Start portal animation
         portalWallScale = 0f
 
-
+        // Update X, Y, Z
         x = portalWall.x()
         y = portalWall.y()
         z = portalWall.z()
@@ -414,12 +417,13 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
         portalFrame?.translateLocal(Vector3f(clampedDistance,0f,0f))
         portalFrame?.scaleLocal(Vector3f(0.8f, 0.8f, 0.8f))
 
+        // Update X, Y, Z
         x = portalWall.x()
         y = portalWall.y()
         z = portalWall.z()
     }
 
-    // For portal in portal rendering, so z-fighting doesnt happen
+    // For portal in portal rendering, so z-fighting doesn't happen
     fun setToInitPos() {
         //Portal & Frame transformation
         portalWall.setRotation(Math.toRadians(rotx),Math.toRadians(roty),Math.toRadians(rotz))

@@ -43,6 +43,7 @@ class Renderable(val meshes : MutableList<Mesh>) : Transformable(), IRenderable 
         }
     }
 
+    // For Debugging
     fun renderWithPortalCheckDebugging(shaderProgram: ShaderProgram, portal: Portal) {
 
         val col = Collision(0f,0f,0f,0f,0f,0f)
@@ -64,6 +65,7 @@ class Renderable(val meshes : MutableList<Mesh>) : Transformable(), IRenderable 
 
     }
 
+    // Checks if a renderable/mesh is colliding with a portal
     fun checkCollisionWithPortal(portal: Portal) : Collision {
 
         val col = Collision(0f,0f,0f,0f,0f,0f)

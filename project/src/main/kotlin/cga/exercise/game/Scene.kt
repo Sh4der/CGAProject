@@ -24,13 +24,11 @@ import cga.framework.OBJLoader.OBJResult
 import org.joml.*
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL11.*
-import java.util.*
 import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.system.exitProcess
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.nio.ByteBuffer
 
 
 class Scene(private val window: GameWindow) {
@@ -45,12 +43,7 @@ class Scene(private val window: GameWindow) {
     private val crosshairShader : ShaderProgram
 
     private val cam : TronCamera
-    private val camOverview : TronCamera
-
-    private var ground : Renderable
-    private var wall : Renderable
-    private var wall2 : Renderable
-    private var testLevel : Renderable?
+    private var level : Renderable?
     private var buttonStart : Renderable?
     private var buttonEnd : Renderable?
 
@@ -93,11 +86,7 @@ class Scene(private val window: GameWindow) {
     private var portal2 : Portal
 
 
-    //Other
-    private val rob : Renderable?
-
     private val lightPool  = Lightpool()
-
     private var cellShading : Int = 0
 
 
@@ -121,7 +110,7 @@ class Scene(private val window: GameWindow) {
         glFrontFace(GL_CCW); GLError.checkThrow()
         glCullFace(GL_BACK); GLError.checkThrow()
 
-
+        // Create Shader Programs
         staticShader = ShaderProgram("assets/shaders/tron_vert.glsl", "assets/shaders/tron_frag.glsl")
         gBufferShader = ShaderProgram("assets/shaders/g_Buffer_vert.glsl", "assets/shaders/g_Buffer_frag.glsl")
         ssaoColorShader = ShaderProgram("assets/shaders/screen_vert.glsl", "assets/shaders/ssaoColor_frag.glsl")
@@ -139,12 +128,9 @@ class Scene(private val window: GameWindow) {
         val vertexAttributes = arrayOf<VertexAttribute>(attrPos, attrTC, attrNorm)
 
 
-        //lightCycle = ModelLoader.loadModel("assets/Light Cycle/Light Cycle/HQ_Movie cycle.obj", Math.toRadians(-90f), Math.toRadians(90f), 0f)
+        //Load in player model (not used anymore, but the renderable needs to exist)
         player = ModelLoader.loadModel("assets/chell/0.obj", Math.toRadians(0f), Math.toRadians(180f), 0f)
-        if(player == null)
-        {
-            exitProcess(1)
-        }
+        if (player == null) { exitProcess(1) } // Exit if player model doesn't exist.
         player?.meshes?.get(2)?.material?.emitColor = Vector3f(1f, 0f, 0f)
         player?.scaleLocal(Vector3f(1f))
         player?.setPosition(11.7f,1.2637f,57f)
@@ -196,31 +182,16 @@ class Scene(private val window: GameWindow) {
         val groundMesh: OBJMesh = resGround.objects[0].meshes[0]
         val meshGround = Mesh(groundMesh.vertexData, groundMesh.indexData, vertexAttributes, groundMaterial)
 
-        ground = Renderable(mutableListOf(meshGround))
-        ground.meshes[0].material?.emitColor = Vector3f(1f, 1f, 1f)
-
-        wall = Renderable(mutableListOf(meshGround))
-        wall.rotateLocal(90f, 0f, 0f)
-        wall2 = Renderable(mutableListOf(meshGround))
-        wall2.translateLocal(Vector3f(8f,0f,0f))
-        wall2.rotateLocal(90f, 0f, 90f)
-
-
+        // Init cam
         cam = TronCamera()
         cam.rotateLocal(0f, 0f, 0f)
         cam.translateLocal(Vector3f(0f, 2f, 0f))
         cam.parent = player!!
         portalGun?.parent = cam
 
-        camOverview = TronCamera()
-        camOverview.rotateLocal(-45f, 0f, 0f)
-        camOverview.translateLocal(Vector3f(0f, 10f, 30f))
-        //camOverview.parent = lightCycle!!
 
+        // Init lights
         pointLight = PointLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255))
-        //pointLight.parent = player
-        //lightpool.add(pointLight)
-
 
         for (i in 0..40)
         {
@@ -233,7 +204,6 @@ class Scene(private val window: GameWindow) {
             light.rotateLocal((Random.nextFloat() * 2.0f - 1.0f) * 360f, (Random.nextFloat() * 2.0f - 1.0f) * 360f, (Random.nextFloat() * 2.0f - 1.0f) * 360f)
             lightPool.add(light)
         }
-
 
         spotLight = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(0, 0, 0), 16.5f, 20.5f)
         spotLightPortal1 = SpotLight(Vector3f(0f, 1f, 0f), Vector3i(255, 255, 255), 16.5f, 20.5f)
@@ -269,6 +239,7 @@ class Scene(private val window: GameWindow) {
         testTex.setTexParams(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST)
 
 
+        // Framebuffer objects
         gBufferObject = GeometryFramebuffer(window.framebufferWidth, window.framebufferHeight)
         ssaoTextureFramebuffer = SSAOTextureFramebuffer(window.framebufferWidth, window.framebufferHeight)
         blurFramebuffer = SimpleFramebuffer(window.framebufferWidth, window.framebufferHeight)
@@ -291,17 +262,10 @@ class Scene(private val window: GameWindow) {
         portal1 = Portal(window, screenShader, Vector3f(11f / 255f, 106 / 255f, 230 / 255f), 999f, 999f, -0.235f, 0f, 270f, 0f)
         portal2 = Portal(window, screenShader, Vector3f(230f / 255f, 106 / 255f, 11 / 255f), 999f, 999f, 5f, 0f, 180f, 0f)
 
-
-        rob = ModelLoader.loadModel("assets/models/kugel.obj", 0f, 0f, 0f)
-        rob?.setPosition(-10f,0f,10f)
-        rob?.scaleLocal(Vector3f(2f))
-        rob?.meshes?.get(0)?.material?.emit = emitTex
-        rob?.meshes?.get(0)?.material?.specular = specTex
-        rob?.meshes?.get(0)?.material?.diff = diffTex
-
-        testLevel = ModelLoader.loadModel("assets/models/mainLevel.obj", 0f, 0f, 0f)
-        testLevel?.setEmitColor(Vector3f(1f))
-        for (m in testLevel?.meshes!!) {
+        // load in a 3d Level made in Blender
+        level = ModelLoader.loadModel("assets/models/mainLevel.obj", 0f, 0f, 0f)
+        level?.setEmitColor(Vector3f(1f))
+        for (m in level?.meshes!!) {
             m.material?.emit = emitTex
             m.material?.specular = specTex
             m.material?.diff = diffTex
@@ -311,18 +275,18 @@ class Scene(private val window: GameWindow) {
 
 
         //Add collision from a 3d model
-        collisionPool.addCollisionFromObject("assets/models/mainLevel.obj", Vector3f(0f))
+        collisionPool.addCollisionFromObject("assets/models/mainLevel.obj", Vector3f(0f)) // Generate Collision Masks from 3d Level
         collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(-14f,0f,17f))
         collisionPool.addCollisionFromObject("assets/models/button.obj", Vector3f(0f), Vector3f(-9f,17f,11f))
 
 
-        //Animation test
+        //Load in animated player model
         animatedPlayer = Animation("assets/char/char_", 0, 19, 0f, 180f, 0f)
         animatedPlayer.setParent(player!!)
         animatedPlayer.scaleLocal(Vector3f(0.3f))
 
 
-        //Add Button
+        //Add Buttons for timer start and end
         buttonStart = ModelLoader.loadModel("assets/models/button.obj", 0f, 0f, 0f)
         buttonEnd = ModelLoader.loadModel("assets/models/button.obj", 0f, 0f, 0f)
 
@@ -346,14 +310,16 @@ class Scene(private val window: GameWindow) {
     fun render(dt: Float, t: Float) {
 
         //Set the cameras for the two portals
+        portal1.updatePortalSettings(portal2, player, cam)
+        portal2.updatePortalSettings(portal1, player, cam)
 
-        portal1.setCameraParent(portal2, player, cam)
-        portal2.setCameraParent(portal1, player, cam)
+        // Portal PortalGun Parents, so they are on the correct position
         portalGunPortal1?.parent = portal1.camera
         portalGunPortal2?.parent = portal2.camera
         spotLightPortal1.parent = portal1.camera
         spotLightPortal2.parent = portal2.camera
 
+        // Set the initPos Var for the portals
         portal1.setToInitPos()
         portal2.setToInitPos()
 
@@ -369,7 +335,7 @@ class Scene(private val window: GameWindow) {
         animatedPlayer.render(gBufferShader, dt)
         buttonStart?.render(gBufferShader)
         buttonEnd?.render(gBufferShader)
-        testLevel?.renderWithPortalCheck(gBufferShader, portal2)
+        level?.renderWithPortalCheck(gBufferShader, portal2)
         portalGunPortal1?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal1.setTexture(oldTexturePortal1.framebufferTexture)
@@ -434,7 +400,7 @@ class Scene(private val window: GameWindow) {
         animatedPlayer.render(gBufferShader, dt)
         buttonStart?.render(gBufferShader)
         buttonEnd?.render(gBufferShader)
-        testLevel?.renderWithPortalCheck(gBufferShader, portal1)
+        level?.renderWithPortalCheck(gBufferShader, portal1)
         portalGunPortal2?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
         portal2.setTexture(oldTexturePortal2.framebufferTexture)
@@ -501,7 +467,7 @@ class Scene(private val window: GameWindow) {
         gBufferObject.startRender(gBufferShader)
         cam.bind(gBufferShader); GLError.checkThrow()
         portalGun?.render(gBufferShader); GLError.checkThrow()
-        testLevel?.render(gBufferShader)
+        level?.render(gBufferShader)
         buttonStart?.render(gBufferShader)
         buttonEnd?.render(gBufferShader)
         glDisable(GL_CULL_FACE)
@@ -576,7 +542,7 @@ class Scene(private val window: GameWindow) {
 
 
 
-
+    // Timer vars for the start and end buttons
     private var startTime = 0f
     private var endTime = 0f
 
@@ -609,6 +575,7 @@ class Scene(private val window: GameWindow) {
     var ytop = player!!.y() + yheight //Unused, because it is in the getPlayerCollision() function
     var ybottom = player!!.y() //Unused, because it is in the getPlayerCollision() function
 
+    // Button state vars
     var eKeyState = false
     var leftMBState = false
     var rightMBState = false
@@ -630,7 +597,7 @@ class Scene(private val window: GameWindow) {
         k_r = window.getKeyState(GLFW.GLFW_KEY_D) //Right
         k_a = window.getKeyState(GLFW.GLFW_KEY_SPACE) //Space
 
-        hspeed *= 0.8f //Decrease speed over time <--- DOESNT WORK WITH THE CURRECT PORTALS!
+        hspeed *= 0.8f //Decrease speed over time <--- DOESNT WORK WITH THE CURRENT PORTALS!
         vspeed *= 0.8f
         direction = player?.getYDirDeg()!!.toFloat()
 
@@ -658,7 +625,7 @@ class Scene(private val window: GameWindow) {
         //println("HSPEED: ${hspeed} | VSPEED: $vspeed}")
         //println(direction)
 
-        //Check for portal almost collision
+        //Check for portal almost collision with the player
         if ((portal1.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z)) || (portal2.checkAlmostCollision(player?.getWorldPosition()!!.x, player?.getWorldPosition()!!.y, player?.getWorldPosition()!!.z))) {
             touchx = false
             touchz = false
@@ -670,7 +637,6 @@ class Scene(private val window: GameWindow) {
 
         //Check for X Axis
         if (!touchx) {
-            //player?.setPosition(player?.getWorldPosition()!!.x + hspeed,0f,0f)
             playerNewX = player?.getWorldPosition()!!.x + hspeed
         }
         else {
@@ -692,6 +658,7 @@ class Scene(private val window: GameWindow) {
         //Gravity & Jumping
         if (collisionPool.checkRectangleCollision(getPlayerCollision(player!!.x(), player!!.y() + yspeed, player!!.z()))) {
             yspeed = 0f
+
             //Jumping when on the floor
             if (k_a && canjump) {
                 yspeed = jumpspeed
@@ -699,6 +666,7 @@ class Scene(private val window: GameWindow) {
             }
         }
         else{
+            // Increase / Decrease yspeed, so player goes up and down
             player?.setPosition(player!!.x(), player!!.y() + yspeed, player!!.z())
             yspeed = Math.max(-terminalvelocity,yspeed - ygrav)
         }
@@ -723,7 +691,7 @@ class Scene(private val window: GameWindow) {
                 val raycast = Raycast(player!!.x(), player!!.y() + 2f, player!!.z(), cam.getWorldModelMatrix())
                 val collisionPos = raycast.moveUntilCollision(collisionPool)
                 if (collisionPos != Vector4f(-9999f)) {
-                    portal1.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+                    portal1.setPositionRotation(collisionPos, collisionPool, level!!)
                 }
                 leftMBState = true
             }
@@ -735,7 +703,7 @@ class Scene(private val window: GameWindow) {
                 val raycast = Raycast(player!!.x(), player!!.y() + 2f, player!!.z(), cam.getWorldModelMatrix())
                 val collisionPos = raycast.moveUntilCollision(collisionPool)
                 if (collisionPos != Vector4f(-9999f)) {
-                    portal2.setPositionRotation(collisionPos, collisionPool, testLevel!!)
+                    portal2.setPositionRotation(collisionPos, collisionPool, level!!)
                 }
                 rightMBState = true
             }
@@ -762,8 +730,8 @@ class Scene(private val window: GameWindow) {
             player?.setPosition(portal2.goingOutCoord.x, portal2.goingOutCoord.y-2f, portal2.goingOutCoord.z)
         }
 
-        portal1.setCameraParent(portal2, player, cam)
-        portal2.setCameraParent(portal1, player, cam)
+        portal1.updatePortalSettings(portal2, player, cam)
+        portal2.updatePortalSettings(portal1, player, cam)
 
 
 
@@ -805,6 +773,7 @@ class Scene(private val window: GameWindow) {
 
         }
 
+        // Set a spotlight on the map
         if(window.getKeyState(GLFW.GLFW_KEY_L) &&  t - deltaSpotlight >= 0.5f)
         {
             deltaSpotlight = t
@@ -847,19 +816,20 @@ class Scene(private val window: GameWindow) {
 
     fun onMouseMove(xpos: Double, ypos: Double) {
 
+        // Rotate Camera around
         player?.rotateLocal(0f, (lastX - xpos).toFloat() * sensitivity, 0f)
         cam.rotateLocal((lastY - ypos).toFloat() * sensitivity, 0f, 0f)
         portal1.camera.rotateLocal((lastY - ypos).toFloat() * sensitivity, 0f, 0f)
         portal2.camera.rotateLocal((lastY - ypos).toFloat() * sensitivity, 0f, 0f)
         if (cam.getXDirDeg() > 180f) {
             cam.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
-            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
-            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
+            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f) // Set portal cameras rotation
+            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f) // Set portal cameras rotation
         }
         else if (cam.getXDir() < 0f) {
             cam.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
-            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
-            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f)
+            portal1.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f) // Set portal cameras rotation
+            portal2.camera.rotateLocal(-(lastY - ypos).toFloat() * sensitivity, 0f, 0f) // Set portal cameras rotation
         }
 
         lastX = xpos
@@ -870,26 +840,21 @@ class Scene(private val window: GameWindow) {
     fun cleanup() {}
 
 
-    fun lengthdir_x(length: Float, dir: Float) : Float = (length * (Math.cos(dir.toDouble()))).toFloat()
+    fun lengthdir_x(length: Float, dir: Float) : Float = (length * (Math.cos(dir.toDouble()))).toFloat() // Calculates point based on Direction and length - X
 
-    fun lengthdir_z(length: Float, dir: Float) : Float = (length * (-Math.sin(dir.toDouble()))).toFloat()
+    fun lengthdir_z(length: Float, dir: Float) : Float = (length * (-Math.sin(dir.toDouble()))).toFloat() // Calculates point based on Direction and length - Y
 
-    fun getPlayerCollision(x: Float, y: Float, z: Float) = Collision(x-0.2f, y, z-0.2f, x+0.2f, y+2f, z+0.2f)
+    fun getPlayerCollision(x: Float, y: Float, z: Float) = Collision(x-0.2f, y, z-0.2f, x+0.2f, y+2f, z+0.2f) // Player collision box
 
-    fun pointDistance3d(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2) + (z2-z1).pow(2))
+    fun pointDistance3d(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2) + (z2-z1).pow(2)) // Distance between 2 points in 3d
 
-    fun Float.round(decimals: Int): Float {
-        var multiplier = 1.0
-        repeat(decimals) { multiplier *= 10 }
-        return (round((this * multiplier).toInt()) / multiplier).toFloat()
-    }
-
+    // Start timer
     fun startButtonTimer(t: Float) {
         if (startTime == 0f && pointDistance3d(player!!.x(), player!!.y(), player!!.z(), buttonStart!!.x(), buttonStart!!.y(), buttonStart!!.z()) < 0.8f) {
             startTime = t
             println("TIMER START!")
-            portal1.setPositionRotation(Vector4f(-999f), collisionPool, testLevel)
-            portal2.setPositionRotation(Vector4f(-999f), collisionPool, testLevel)
+            portal1.setPositionRotation(Vector4f(-999f), collisionPool, level)
+            portal2.setPositionRotation(Vector4f(-999f), collisionPool, level)
         }
         else if (startTime > 0 && pointDistance3d(player!!.x(), player!!.y(), player!!.z(), buttonStart!!.x(), buttonStart!!.y(), buttonStart!!.z()) < 0.8f) {
             startTime = 0f
@@ -897,6 +862,7 @@ class Scene(private val window: GameWindow) {
         }
     }
 
+    // End timer
     fun endButtonTimer(t: Float) {
         if (startTime > 0 && pointDistance3d(player!!.x(), player!!.y(), player!!.z(), buttonEnd!!.x(), buttonEnd!!.y(), buttonEnd!!.z()) < 0.8f) {
             endTime = t
