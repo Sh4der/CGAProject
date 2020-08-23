@@ -18,22 +18,31 @@ import org.lwjgl.opengl.GL42
  */
 class GeometryFramebuffer(_width : Int, _height : Int) : Framebuffer(_width, _height) {
 
+    //texture to store the position data of the scene
     lateinit var gPosition : Texture2D
         private set
+    //texture to store normals of the scene
     lateinit var gNormal : Texture2D
         private set
+    //texture to store the diff texture color
     lateinit var gDiffTex : Texture2D
         private set
+    //texture to store the emit texture color
     lateinit var gEmitTex : Texture2D
         private set
+    //texture to store the spec texture color
     lateinit var gSpecTex : Texture2D
         private set
+    //texture to store the shininess of every pixel
     lateinit var gShininess : Texture2D
         private set
+    //texture to store the shininess of every pixel
     lateinit var gEmitColor : Texture2D
         private set
+    //texture to store the information wether an pixel is an portal or not
     lateinit var gIsPortal : Texture2D
         private set
+    //depth buffer
     var depthRenderbuffer : Int = 0
         private set
 

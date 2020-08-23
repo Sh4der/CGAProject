@@ -11,6 +11,7 @@ import java.nio.file.Paths
 
 /**
  * Created by Fabian on 16.09.2017.
+ * Edited by Lukas on 21.08.2020
  */
 class ShaderProgram(vertexShaderPath: String, fragmentShaderPath: String) {
     private val uniformLocationCache = HashMap<String, Int>()
