@@ -11,7 +11,7 @@ import java.util.*
 class Raycast(var x: Float, var y: Float, var z: Float, val mm: Matrix4f) : Transformable() {
 
     val speed = -0.001f
-    val startx = x
+    val startx = x // XYZ is not needed, because we have the model matrix
     val starty = y
     val startz = z
 
