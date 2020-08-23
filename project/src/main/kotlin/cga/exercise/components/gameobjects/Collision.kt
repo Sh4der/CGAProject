@@ -111,7 +111,7 @@ class Collision (var x1: Float, var y1: Float, var z1: Float, var x2: Float, var
     fun getCollisionSide(check_x: Float, check_y: Float, check_z: Float, startx: Float, starty: Float, startz: Float) : Vector2f { //Returns degrees for portal rotation
         /*              TOP
                  |---------------------------------------------------|
-          LEFT  |  |---------------------------------------------|  |  RIGHT    <---- Wall
+          LEFT  |  |---------------------------------------------|  |  RIGHT    <---- Wall (view from top)
                 |---------------------------------------------------|
                         BOTTOM
         */

@@ -24,11 +24,10 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     /*
     What does a portal need?
     - 3d Object (Wall)
-    - 3d Object (Border) - Later
+    - 3d Object (Border)
     - Camera
     - Framebuffer
     - Material
-    - Function to generate current Material (Texture from camera)
     */
 
     var framebuffer : SimpleFramebuffer
@@ -307,7 +306,7 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
     }
 
     fun renderWithPortalCheck(shaderProgram: ShaderProgram, otherPortal: Portal, dt: Float) {
-        if (pointDistance(this.x, this.y, otherPortal.x, otherPortal.y) >= 1.5f) {
+        if (pointDistance(this.x, this.z, otherPortal.x, otherPortal.z) >= 1.5f) {
             render(shaderProgram, dt)
         }
     }
@@ -344,6 +343,8 @@ class Portal(val window: GameWindow, val screenShader: ShaderProgram, val frameC
 
     // Returns distance from point a to point b in 2d
     fun pointDistance(x1: Float, y1: Float, x2: Float, y2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2))
+
+    fun pointDistance3d(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float):Float = Math.sqrt((x2-x1).pow(2) + (y2-y1).pow(2) + (z2-z1).pow(2)) // Distance between 2 points in 3d
 
     // Set the position and rotation of the portal
     fun setPositionRotation(pos: Vector4f, colPool: CollisionPool, level: Renderable?) {
