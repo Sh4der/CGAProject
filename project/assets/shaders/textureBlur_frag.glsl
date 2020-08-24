@@ -33,7 +33,6 @@ void main()
     vec2 texSize = 1.0 / vec2(textureSize(ssaoInput, 0));
 
     //fill kernel array with gaussian values
-    float Z = 0.0;
     for (int j = 0; j <= kernelRadius; ++j)
     {
         kernel[kernelRadius+j] = kernel[kernelRadius-j] = normpdf(float(j), sigma);
